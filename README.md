@@ -1,33 +1,38 @@
-# ios-port · FuckDSManger iOS 移植
+# FDM · iOS 运行时模块
 
-把安卓 LSPosed 模块 **FuckDSManger** 移植到 iOS。
+一个在 iOS 上做**运行时方法替换（method swizzling）+ 视图层改造**的实验项目。
+纯 Objective-C + 少量 C，Theos 交叉编译，产物是单个 `dylib`。
 
-**宿主**：DeepSeek Chat · `com.deepseek.chat`
-**设备**：iPhone 7P (A10/iPhone9,2) · iOS 15.8.4 · Dopamine（rootless）
-**方式**：小窝交叉编译 → TrollFools 注入 Loader → hot-reload
+技术上想解决的几件事：桌面级 UI 注入怎么做到零崩溃、Swift 泛型特化类怎么安全地
+hook、TextKit 排版层被宿主覆盖时怎么用「状态驱动」兜回来、以及在没有符号表的
+闭源 App 里怎么靠运行时测绘定位锚点。
 
-> 许可证：[PolyForm Noncommercial 1.0.0](LICENSE) —— 与安卓版一致，**禁止商业使用**
+> 许可证：[PolyForm Noncommercial 1.0.0](LICENSE) —— 学习交流可以，**禁止商业使用**
 > 三方声明：[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
-> 作者：尼得亚伯 (Nideryabor) & dxyabab
+> 日志：`docs/`（56 篇，按日期排，含全部踩坑与血案复盘）
 
 ---
 
-## 📦 安装（TrollFools 注入）
+## 📦 安装
 
-去 [Releases](https://github.com/Nideryabor/FDM-iOS/releases) 下最新版的
-`FDM.dylib`（或整个 `FDM-xxx-trollfools.tar.gz`，里面带注入说明）。
+产物是给 **TrollFools** 用的（`install_name = @executable_path/Frameworks/FDM.dylib`）。
+去 [Releases](../../releases) 下最新版的 `FDM.dylib`。
 
-1. 把 `FDM.dylib` 传到手机（Filza / 文件 App）
-2. 打开 **TrollFools** → 选 `DeepSeek Chat` → `+` → 选这个 dylib → 注入
-3. **完全退出** App（上滑杀掉）再打开
-4. 进「设置」页，列表底部应出现「FDM 模块设置」
+1. 把 `FDM.dylib` 传到手机（Filza / 文件 App 都行）
+2. TrollFools → 选目标 App → `+` → 选这个 dylib → 注入
+3. **完全退出**目标 App（上滑杀掉）再打开
+4. 进「设置」页，列表底部会出现「模块设置」入口
 
-> ⚠️ **两条路线不要同时开**。本仓早期用的是 ElleKit 路线
-> （`/var/jb/usr/lib/TweakInject/FDM.dylib`）。
-> 现在统一走 TrollFools 直注 —— 那个旧文件要停用/删掉，
-> 否则两边抢着加载（虽然模块有单实例锁，但配置会被读两遍，行为很难懂）。
+> 适用范围与三方归属见 [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md)。
+> 版本兼容性看 `docs/` 里最新的勘察记录 —— 换宿主版本后很多锚点会漂，
+> 需要重新测绘（`analysis/map271` 那套工具就是干这个的）。
 
-**装好没怎么验**：`Documents/fdm.log` 里应该有
+> ⚠️ **两条注入路线不要同时开**。早期版本走的是系统级 tweak 目录
+> （`/var/jb/usr/lib/TweakInject/`）。现在统一 TrollFools 直注，
+> 旧的系统级那份要停用 —— 否则两份同时加载，配置会被读两遍，行为很难懂
+> （模块有单实例锁，所以不至于崩，但排查起来很费劲）。
+
+**装好没怎么验**：目标 App 的 `Documents/fdm.log` 里应该有
 
 ```
 [sys] FDM v7.1 已加载  pid=xxxxx
