@@ -1,9 +1,14 @@
 # ios-port · FuckDSManger iOS 移植
 
 把安卓 LSPosed 模块 **FuckDSManger** 移植到 iOS。
-**宿主**：DeepSeek Chat 2.6.2 · `com.deepseek.chat`
+
+**宿主**：DeepSeek Chat · `com.deepseek.chat`
 **设备**：iPhone 7P (A10/iPhone9,2) · iOS 15.8.4 · Dopamine（rootless）
 **方式**：小窝交叉编译 → TrollFools 注入 Loader → hot-reload
+
+> 许可证：[PolyForm Noncommercial 1.0.0](LICENSE) —— 与安卓版一致，**禁止商业使用**
+> 三方声明：[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
+> 作者：尼得亚伯 (Nideryabor) & dxyabab
 
 ---
 

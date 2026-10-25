@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// Copyright (c) 2026 尼得亚伯 (Nideryabor) & dxyabab | 仅供学习交流，禁止商业使用
+
 /* ============================================================
  * FDM v0.6 —— 收口 + 网络层侦察 + 零宽提示词注入（可开关）
  *

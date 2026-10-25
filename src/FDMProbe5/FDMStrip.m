@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// Copyright (c) 2026 尼得亚伯 (Nideryabor) & dxyabab | 仅供学习交流，禁止商业使用
+
 /* ============================================================
  * FDMStrip —— ⟦FDM⟧…⟦/FDM⟧ 标记抹除（**仅显示层**）
  *
