@@ -528,8 +528,14 @@ static NSAttributedString *RenderDj(NSString *inner, NSDictionary *baseAttrs) {
         FLOGD(FC_MUSIC, @"[dj] %@ 15 秒内处理过，跳过", body);
     }
 
-    /* ② 要显示的那一行 */
+    /* ② 要显示的那一行
+     *   ★ 2026-10-25：接上「渲染时显示正在播放」开关（dj_inline_hint）
+     *   模型写 |hidden 或用户在设置里关掉 ⇒ 这行整个不显示。 */
     if (hidden) return nil;
+    {
+        extern NSString *const P_MUSIC;
+        if (![[FDMConfig shared] boolFor:P_MUSIC key:@"dj_inline_hint"]) return nil;
+    }
 
     NSMutableDictionary *a = [NSMutableDictionary dictionaryWithDictionary:baseAttrs];
     UIFont *bf = a[NSFontAttributeName];

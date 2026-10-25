@@ -1958,6 +1958,14 @@ static void fdm_real_init(void) {
                                 FDMUIAutoShotCapture([NSString stringWithFormat:
                                     @"%02lu-%@", (unsigned long)(i + 2), gid]);
                             });
+                            /* ★ 再给 0.6s，滚到底补拍一张（页长超一屏时必需） */
+                            dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                                         (int64_t)(1.4 * NSEC_PER_SEC)),
+                                           dispatch_get_main_queue(), ^{
+                                extern void FDMUIAutoShotCaptureTail(NSString *name);
+                                FDMUIAutoShotCaptureTail([NSString stringWithFormat:
+                                    @"%02lu-%@", (unsigned long)(i + 2), gid]);
+                            });
                         }
                     });
                 }

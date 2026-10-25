@@ -1098,6 +1098,40 @@ static NSAttributedString *STRichify(NSAttributedString *in) {
 static NSMapTable<UIView *, NSString *> *gEnsuredFP = nil;
 static int gNEnsureFixed = 0;
 
+/* ★★★ 2026-10-25 真机复发修复：指纹判据错了
+ *
+ * 旧写法（错）：
+ *     记「原串」；当前串 == 原串 ⇒ 跳过
+ *   ⇒ 宿主把渲染好的又打回原样后，当前串**又变回原串**，
+ *     巡检一看「咦这个串我修过」⇒ 永远放手。
+ *   ⇒ 表现：只修一次，之后一直裸标签（主人报的「又抽风了」）。
+ *
+ * 新写法（对）：
+ *     记「**我设进去的结果串**」；当前串 == 结果串 ⇒ 已经是对的，跳过。
+ *   只要屏幕上不是我要的结果，就说明被打回了 ⇒ 再修一次。
+ *   这才是「状态驱动」的本意：比的是**目标状态**，不是「我干过没」。
+ *
+ * 防抖：同一个控件 1.5 秒内最多修 6 次（宿主若死命覆盖，我们不至于打满 CPU）。
+ */
+static NSMapTable<UIView *, NSNumber *> *gEnsureGuardAt = nil;   /* 上次修正时间 */
+static NSMapTable<UIView *, NSNumber *> *gEnsureGuardN  = nil;   /* 窗口内次数  */
+
+static BOOL EnsureGuardAllow(UIView *v) {
+    if (!gEnsureGuardAt) gEnsureGuardAt = [NSMapTable weakToStrongObjectsMapTable];
+    if (!gEnsureGuardN)  gEnsureGuardN  = [NSMapTable weakToStrongObjectsMapTable];
+    CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
+    NSNumber *at = [gEnsureGuardAt objectForKey:v];
+    NSNumber *n  = [gEnsureGuardN objectForKey:v];
+    if (!at || now - at.doubleValue > 1.5) {      /* 新窗口 */
+        [gEnsureGuardAt setObject:@(now) forKey:v];
+        [gEnsureGuardN  setObject:@1   forKey:v];
+        return YES;
+    }
+    if (n.intValue >= 6) return NO;               /* 窗口内已修 6 次，先停手 */
+    [gEnsureGuardN setObject:@(n.intValue + 1) forKey:v];
+    return YES;
+}
+
 static void STEnsureRichOnce(void) {
     @try {
         UIWindow *w = nil;
@@ -1129,31 +1163,43 @@ static void STEnsureRichOnce(void) {
             if (cur.length < 8 || cur.length > 8000) continue;
 
             NSString *str = cur.string;
-            /* ★ 快速闸：不含 '<' 立刻跳过（命中率 99.9% 都不含） */
-            if ([str rangeOfString:@"<"].location == NSNotFound) continue;
 
-            /* 同一个串修正过就别重复干（避免每 0.4s 重渲染） */
+            /* ★ 判据改成「和上次我设进去的结果比」：
+             *   相等 ⇒ 屏幕上已经是我要的样子，跳过（这是常态，99% 的轮次走这里）
+             *   不等 ⇒ 要么被打回了、要么内容变了 ⇒ 往下走去修
+             *
+             *   ⚠️ 注意这里**不再**用「含不含 '<'」做闸门 —— 因为渲染过的内容
+             *   可能仍然含 '<'（例如用户真的想显示 <b> 字面量），
+             *   用「!= 目标」才是准确判据。快速闸留在 render 函数内部。 */
             NSString *prev = nil;
             @try { prev = [gEnsuredFP objectForKey:v]; } @catch (NSException *e) { }
             if (prev && [prev isEqualToString:str]) continue;
+
+            if (!EnsureGuardAllow(v)) continue;
 
             /* 干正事：渲染 + 重设 */
             NSAttributedString *rich = nil;
             @try {
                 rich = STRichify(cur);
             } @catch (NSException *e) { rich = nil; }
-            if (!rich || !rich.length) continue;
-            if ([rich.string isEqualToString:str]) continue;   /* 没变化，跳过 */
+
+            if (!rich || !rich.length) {
+                /* 渲染器说「这段没东西可渲染」⇒ 记下当前串，
+                 * 避免每轮都白跑一次 render（这是性能关键）。 */
+                @try { [gEnsuredFP setObject:str forKey:v]; } @catch (NSException *e) { }
+                continue;
+            }
 
             @try {
                 [(id)v setAttributedText:rich];
-                [gEnsuredFP setObject:str forKey:v];           /* 记住原串，避免重复 */
+                /* ★ 记**结果串**（不是原串）—— 下一个 tick 拿它比对 */
+                [gEnsuredFP setObject:rich.string forKey:v];
                 fixed++;
                 gNEnsureFixed++;
-                if (gNEnsureFixed <= 12) {
+                if (gNEnsureFixed <= 20) {
                     FLOGI(FC_UI, @"[ensure] ★ 巡检修正 %@ %lu→%lu 字",
                           NSStringFromClass([v class]),
-                          (unsigned long)str.length, (unsigned long)rich.length);
+                          (unsigned long)str.length, (unsigned long)rich.string.length);
                 }
             } @catch (NSException *e) { }
         }

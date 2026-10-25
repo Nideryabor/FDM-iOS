@@ -126,7 +126,7 @@ void FDMFeaturesRegister(void) {
         @"把指令拼在消息前发给模型，界面上抹掉。\n✅ 推荐 fdm 模式：支持中文，标记会被渲染层洗掉\n⚠️ tag 模式在 iOS 会把零宽字符渲染成一排 ?，不建议用\n重启 App 生效。",
         @[
         F(@"mode", @"注入方式", FDMFieldTypeEnum, @"fdm",
-          @"fdm   = ⟦FDM⟧明文定界（**推荐**，支持中文，靠渲染抹除隐藏）\n"
+          @"fdm   = ⟦FDM⟧明文定界（推荐，支持中文，靠渲染抹除隐藏）\n"
           @"tag   = 零宽字符（⚠️ 不推荐：iOS 字体没有字形，会渲染成一排 ? 豆腐块）\n"
           @"plain = 明文前缀（看得见，仅对照实验）\n"
           @"off   = 关闭"),
@@ -394,9 +394,9 @@ void FDMFeaturesRegister(void) {
         @"给 AI 回复左边加一个圆形头像。\n\n"
         @"⚠️ 查证结论（2026-10-24）：宿主里虽然有 "
         @"AgentMessageView.AvatarView / InnerAvatarView 两个类，"
-        @"但 AgentMessageView 的 ivar 表里**没有任何 avatar 槽位**"
+        @"但 AgentMessageView 的 ivar 表里没有任何 avatar 槽位"
         @"（只有 loadingView / operationBar / shareToggle…），"
-        @"也没有创建它的方法 ⇒ **iOS 宿主根本不显示助手头像**，"
+        @"也没有创建它的方法 ⇒ iOS 宿主根本不显示助手头像，"
         @"跟安卓那边（被灰度 hide_assistant_avatar 关掉）不一样，iOS 是压根没做。\n\n"
         @"所以只能由我们插一个。位置是实测出来的："
         @"AI 正文左边正好空 24px（AgentFragmentsView.x = 24），"
@@ -463,7 +463,7 @@ void FDMFeaturesRegister(void) {
     [C registerGroup:PG(P_FILECARD, @"文件快捷选项", P_BEAUTY, 50, @"📎",
         @"fdm-filecard.json",
         @"上传文件后，文件条下面出现一排快捷按钮。\n"
-        @"点一下 = 把对应的话**填进输入框**（不直接发，你还能改）。\n"
+        @"点一下 = 把对应的话填进输入框（不直接发，你还能改）。\n"
         @"\n"
         @"格式：一行一条，`按钮文字|要发送的话`\n"
         @"缺 `|` 时整行当按钮文字（点了就把这段文字填进去）。\n"
@@ -500,7 +500,7 @@ void FDMFeaturesRegister(void) {
         @"fdm-glass.json",
         @"iOS 26 的 Liquid Glass 材质。\n"
         @"\n"
-        @"iOS 26+ 用系统原生 UIGlassEffect；以下用**自己合成**逼近：\n"
+        @"iOS 26+ 用系统原生 UIGlassEffect；以下用自己合成逼近：\n"
         @"  模糊调参 + 边缘高光 + 玻璃厚度渐变 + 透镜放大\n"
         @"\n"
         @"⚠️ 做不到的：真屏幕空间折射（那要给 UIKit 层 Metal shader 权限）。\n"
@@ -535,7 +535,7 @@ void FDMFeaturesRegister(void) {
         F(@"sse_smooth_follow", @"流式平滑跟随", FDMFieldTypeBool, @YES, @"逐字输出更顺滑"),
         F(@"sse_auto_scroll_one_screen", @"自动滚动一屏", FDMFieldTypeBool, @YES, @"新内容超过一屏才滚动"),
         F(@"optimize_markdown", @"Markdown 优化", FDMFieldTypeBool, @YES, @"更好的排版渲染"),
-        F(@"copy_text_without_markdown_syntax", @"复制去掉 MD 标记", FDMFieldTypeBool, @NO, @"复制正文不带 ** ## 之类符号"),
+        F(@"copy_text_without_markdown_syntax", @"复制去掉 MD 标记", FDMFieldTypeBool, @NO, @"复制正文不带  ## 之类符号"),
         F(@"select_text_without_markdown_syntax", @"选择文字去 MD", FDMFieldTypeBool, @NO, @"长按选择时也不带标记"),
         F(@"disable_single_dollar_latex", @"禁用单$公式", FDMFieldTypeBool, @NO, @"避免 $ 被当成数学公式"),
         F(@"markdown_top_level_node_limit", @"Markdown 节点上限", FDMFieldTypeInt, @0, @"0=不限；越大越吃性能"),
@@ -644,7 +644,7 @@ void FDMFeaturesRegister(void) {
     [C registerGroup:PG(P_MUSIC, @"音乐播放", P_BEAUTY, 100, @"🎵",
         @"fdm-music.json",
         @"网易云曲库（免登录可用，走 eapi 通道）。\n"
-        @"音频只在 AVPlayer 里流式播放，**永不下载、永不落盘**；\n"
+        @"音频只在 AVPlayer 里流式播放，永不下载、永不落盘；\n"
         @"封面与歌词只放内存。存档只有歌名/歌手/进度这类事实性元数据。\n"
         @"\n"
         @"点歌：让模型在回复里单起一行写 ⟦DJ:歌名-歌手⟧，会自动搜来放。\n"
@@ -663,7 +663,7 @@ void FDMFeaturesRegister(void) {
         F(@"vol", @"音量", FDMFieldTypeInt, @70, @"0 ~ 100（只影响音乐，不改系统音量）"),
         F(@"autoplay", @"打开 App 自动播放", FDMFieldTypeBool, @NO,
           @"开 = 每次启动自动接着上次那首放（从上次的进度开始）\n"
-          @"关 = 要你自己点播放 —— **推荐**，不然一开 App 就出声\n"
+          @"关 = 要你自己点播放 —— 推荐，不然一开 App 就出声\n"
           @"⚠️ 重启 App 生效"),
         FE(@"repeat", @"循环模式", FDMFieldTypeEnum, @"1",
            @"0 = 放完就停　1 = 列表循环　2 = 单曲循环\n"
@@ -672,6 +672,19 @@ void FDMFeaturesRegister(void) {
         F(@"shuffle", @"随机播放", FDMFieldTypeBool, @NO, @"随机挑下一首（会避开当前这首）"),
         FINFO(@"—— 说明 ——", nil),
         FINFO(@"✦ 迷你卡", @"点 ♪ 切到搜索页，输入关键词回车；点结果里的一条就开始放"),
+        /* ★★ 2026-10-25 点歌的「告诉模型」部分
+         *   渲染/播放/去重早就有了，缺的只是让模型知道能点。
+         *   这里把它接进系统提示词注入链路（⟦FDM⟧ … ⟦/FDM⟧，显示层会抹掉）。 */
+        F(@"dj_prompt_on", @"让 AI 知道可以点歌", FDMFieldTypeBool, @YES,
+          @"把「你可以写 ⟦DJ:歌名-歌手⟧ 来放歌」这段话自动拼进系统提示词。\n\n"
+          @"⚠️ 生效前提：聊天 → 系统提示词的注入方式不能是 off（没注入就带不了话）。\n"
+          @"关掉之后模型不知道这个标记，点歌就只剩你手动写。"),
+        F(@"dj_prompt_text", @"点歌说明（可自定义）", FDMFieldTypeString, @"",
+          @"留空 = 用内置那段（推荐）。想让 AI 用别的口味跟用户说话时改这里。\n"
+          @"⚠️ 一定要保留 ⟦DJ:歌名-歌手⟧ 这个格式，否则渲染层认不出来。"),
+        F(@"dj_inline_hint", @"渲染时显示「正在播放」", FDMFieldTypeBool, @YES,
+          @"开：点歌那行变成「♪ 正在播放 晴天 - 周杰伦」\n"
+          @"关：整段消失（等价于让模型写 |hidden）"),
         FINFO(@"✦ 点歌", @"模型写 ⟦DJ:晴天-周杰伦⟧ ⇒ 自动搜来放；同一首 15 秒内不会重复触发"),
         FINFO(@"✦ 提示词变量", @"开了「系统提示词」的 pvar_on 后，{music} {song} {artist} {lyric} 会自动填"),
         FSUB(@"网易云登录", @"登录后能听完整 VIP 歌（不登录只能试听 30 秒）", @"🔑", P_MUSICLOGIN),
@@ -692,7 +705,7 @@ void FDMFeaturesRegister(void) {
      */
     [C registerGroup:PG(P_MUSICLOGIN, @"网易云登录", P_MUSIC, 10, @"🔑",
         @"fdm-music-login.json",
-        @"登录后才能听**完整**的 VIP 歌（不登录只能试听 30 秒，日志里表现为"
+        @"登录后才能听完整的 VIP 歌（不登录只能试听 30 秒，日志里表现为"
         @"「item ready，时长 30.0s」）。\n"
         @"\n"
         @"三条路，任选一条：\n"
@@ -700,7 +713,7 @@ void FDMFeaturesRegister(void) {
         @"  ② 手机 / 邮箱 + 密码\n"
         @"  ③ 直接粘 cookie（从浏览器里抠 MUSIC_U，最省事）\n"
         @"\n"
-        @"⚠️⚠️ 隐私：凭证是**明文**存在 Documents/FDMmusic/login.json。\n"
+        @"⚠️⚠️ 隐私：凭证是明文存在 Documents/FDMmusic/login.json。\n"
         @"只有本 App 能读，但 root 用户或拿到备份的人可以直接读到，"
         @"进而用你的账号。请自行注意。\n"
         @"（该文件已排除 iCloud 备份。）",
@@ -743,7 +756,7 @@ void FDMFeaturesRegister(void) {
     [C registerGroup:PG(P_ENV, @"环境伪装", nil, 50, @"🎭",
         @"fdm-env.json",
         @"⚠️ iOS 走 TrollFools 注入正版 App，宿主并不知道自己在越狱环境，\n"
-        @"   大部分场景**不需要**伪装。这里只保留设备标识相关。",
+        @"   大部分场景不需要伪装。这里只保留设备标识相关。",
         @[
         F(@"enabled", @"启用伪装", FDMFieldTypeBool, @NO, @"总开关"),
         F(@"device_id", @"自定义设备 ID", FDMFieldTypeBool, @NO,
@@ -767,7 +780,7 @@ void FDMFeaturesRegister(void) {
         F(@"mirror_nslog", @"同时打 NSLog", FDMFieldTypeBool, @NO, @"控制台也能看到（慢）"),
         F(@"dump_response", @"记录响应正文", FDMFieldTypeBool, @NO, @"把 AI 回复也存文件（体积大）"),
         F(@"xray", @"X 光机（渲染层勘察）", FDMFieldTypeBool, @NO,
-          @"把宿主里「消息/文本/Markdown」类的**方法表**打进日志，\n"
+          @"把宿主里「消息/文本/Markdown」类的方法表打进日志，\n"
           @"用来找「渲染抹除」的落点。只读不改，看完记得关。"),
         /* ★★ 2026-10-25 自动截图（改 UI 树时用）
          *   ⚠️ 隐私：截的是**整个屏幕**，聊天内容会被拍进去。所以：
@@ -775,9 +788,9 @@ void FDMFeaturesRegister(void) {
          *     ③ 新一轮开始前清掉上一轮旧图
          *     ④ 只写 Documents，不联网、不上传、不外发 */
         F(@"ui_auto_shot", @"📸 自动截图（改 UI 时用）", FDMFieldTypeBool, @NO,
-          @"打开后**下次启动**：自动弹出设置页 → 逐个进入下面列的页面 → 各拍一张 →\n"
-          @"自己收起，并把本开关**自动关回去**（只跑一轮，不会次次弹）。\n\n"
-          @"⚠️ 隐私：截的是整个屏幕，**聊天内容也会被拍进去**。\n"
+          @"打开后下次启动：自动弹出设置页 → 逐个进入下面列的页面 → 各拍一张 →\n"
+          @"自己收起，并把本开关自动关回去（只跑一轮，不会次次弹）。\n\n"
+          @"⚠️ 隐私：截的是整个屏幕，聊天内容也会被拍进去。\n"
           @"图片只存在 Documents/fdm-ui-*.png，不联网、不上传。\n"
           @"拉走之后建议点上面的「🗑 清空截图」。"),
         F(@"ui_auto_shot_pages", @"要拍的页面 id", FDMFieldTypeString, @"",
@@ -1045,6 +1058,44 @@ NSDictionary *FDMPatchTable(void) {
 
 /* ==================== 提示词注入 ==================== */
 
+/* ==================== ★ 点歌：给模型的那段话 ====================
+ *
+ * 2026-10-25：点歌的渲染/播放/去重早就有，缺的只是「告诉模型可以点」。
+ * 这里生成要拼进系统提示词的片段。
+ *
+ * 设计要点（都是踩过的坑）：
+ *   ① 明确说「必须单起一行」—— 夹在句子中间会被渲染层当成普通文字，
+ *      因为点歌解析只认独立的 ⟦DJ:…⟧（它会把整段替换成一行提示）。
+ *   ② 明确说「不要解释、不要加粗」—— 模型很喜欢写
+ *      **正在为你播放《晴天》** ⟦DJ:晴天-周杰伦⟧，那行解释会留在屏幕上。
+ *   ③ 给「歌名-歌手」格式，但允许只有歌名 —— 搜索对 '-' 很宽容。
+ *   ④ 告诉它有 hidden 变体（不想在对话里留痕时用）。
+ *   ⑤ 不要写"不要说"这种负面指令堆砌 —— 实测模型会反向理解。
+ */
+NSString *FDMDjPromptFragment(void) {
+    FDMConfig *C = [FDMConfig shared];
+    if (![C enabledFor:P_MUSIC]) return nil;
+    if (![C boolFor:P_MUSIC key:@"on"]) return nil;
+    if (![C boolFor:P_MUSIC key:@"dj_prompt_on"]) return nil;
+
+    /* 允许用户完全自定义（留空则用默认） */
+    NSString *custom = [C stringFor:P_MUSIC key:@"dj_prompt_text"];
+    if (custom.length > 8) return custom;
+
+    return @"【点歌】\n"
+           @"这个 App 接了网易云播放器，你可以替用户放歌。方法：在回复里另起一行，"
+           @"只写一个标记，形如：\n"
+           @"⟦DJ:歌名-歌手⟧\n"
+           @"例：⟦DJ:晴天-周杰伦⟧\n"
+           @"规则：\n"
+           @"· 这一行除了标记什么都不要写，标记前后都不要有别的字\n"
+           @"· 标记会被 App 吃掉并显示成播放状态，用户看不到它本身\n"
+           @"· 不需要解释你在放歌，App 会自己显示\n"
+           @"· 一次回复最多点一首；不确定歌名时用你最有把握的那个\n"
+           @"· 如果不想让对话里留下「正在播放」那一行痕迹，写成 ⟦DJ:歌名-歌手|hidden⟧\n"
+           @"· 用户明确要求听歌、或聊到音乐时才用；别每句都点";
+}
+
 void FDMInjectConfig(NSString **mode, NSString **text, BOOL *enabled) {
     FDMConfig *C = [FDMConfig shared];
     BOOL en = [C enabledFor:G_INJECT];
@@ -1053,6 +1104,30 @@ void FDMInjectConfig(NSString **mode, NSString **text, BOOL *enabled) {
     if (!m.length) m = @"off";
     if (!t) t = @"";
     if (!en) m = @"off";
+
+    /* ★★ 2026-10-25 点歌：把「你能点歌」这件事告诉模型
+     *
+     * 为什么必须在这儿拼：
+     *   点歌的**渲染/播放/去重**早就做好了（⟦DJ:歌名-歌手⟧ → 搜 → 放），
+     *   但没有任何东西告诉模型这个标记存在 ⇒ 模型永远不写 ⇒ 功能等于不存在。
+     *   而注入链路只有这一条（`⟦FDM⟧ … ⟦/FDM⟧`，显示层会被 FDMStrip 抹掉），
+     *   所以直接拼在系统提示词末尾，零新增通道、零新增 hook。
+     *
+     * 开关：音乐页 `dj_prompt_on`（默认开）。
+     *   关掉 ⇒ 不拼（用户想自己在提示词里写也行）。
+     *   ⚠️ 只在注入模式 != off 时才有意义 —— 没注入就没法带话。
+     */
+    if (en && ![m isEqualToString:@"off"]) {
+        NSString *frag = FDMDjPromptFragment();
+        if (frag.length) {
+            t = t.length ? [NSString stringWithFormat:@"%@\n\n%@", t, frag] : frag;
+            FLOGI(FC_INJECT, @"[dj] 点歌说明已拼进系统提示词（%lu 字，模式=%@）",
+                  (unsigned long)frag.length, m);
+        } else {
+            FLOGD(FC_INJECT, @"[dj] 点歌说明未附加（音乐关着 / dj_prompt_on 关着）");
+        }
+    }
+
     if (mode) *mode = m;
     if (text) *text = t;
     if (enabled) *enabled = ![m isEqualToString:@"off"];

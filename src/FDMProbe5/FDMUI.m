@@ -1969,6 +1969,54 @@ void FDMUIAutoShotCapture(NSString *name) {
     FLOGI(FC_UI, @"[autoshot] 拍照 %@ → rc=%d", fn, r);
 }
 
+/* ★ 2026-10-25 页尾补充拍照
+ *   为什么：设置页经常比一屏长，只拍一张「首屏」会漏掉页面下半部分
+ *   （这次加的三个点歌字段就全在「说明」区后面，第一张根本看不到）。
+ *   这里把当前页的 tableView 滚到底，再拍一张 -tail。
+ */
+void FDMUIAutoShotCaptureTail(NSString *name) {
+    @try {
+        UINavigationController *nav = gFDMAutoShotNav;
+        UIViewController *top = nav.topViewController;
+        if (!top) return;
+
+        UITableView *tv = nil;
+        if ([top.view isKindOfClass:[UITableView class]]) {
+            tv = (UITableView *)top.view;
+        } else {
+            /* 找 view 里第一个 UITableView */
+            NSMutableArray *st = [NSMutableArray arrayWithObject:top.view];
+            while (st.count && !tv) {
+                UIView *v = st.lastObject;
+                [st removeLastObject];
+                if ([v isKindOfClass:[UITableView class]]) { tv = (UITableView *)v; break; }
+                for (UIView *s in v.subviews) [st addObject:s];
+            }
+        }
+        if (!tv) { FLOGW(FC_UI, @"[autoshot] 没找到 tableView，跳过尾拍"); return; }
+
+        NSInteger secs = [tv numberOfSections];
+        NSInteger last = secs > 0 ? [tv numberOfRowsInSection:secs - 1] : 0;
+        if (secs <= 0 || last <= 0) { FLOGW(FC_UI, @"[autoshot] 表为空，跳过尾拍"); return; }
+
+        NSIndexPath *ip = [NSIndexPath indexPathForRow:last - 1 inSection:secs - 1];
+        [tv scrollToRowAtIndexPath:ip atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+        FLOGI(FC_UI, @"[autoshot] 已滚到底（%ld 段 / 末段 %ld 行）",
+              (long)secs, (long)last);
+
+        /* 滚完让渲染落定一帧再拍 */
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.35 * NSEC_PER_SEC)),
+                       dispatch_get_main_queue(), ^{
+            NSString *fn = [NSString stringWithFormat:@"fdm-ui-%@-tail.png", name ?: @"x"];
+            extern int FDMUICapture2x(NSString *nm);
+            int r = FDMUICapture2x(fn);
+            FLOGI(FC_UI, @"[autoshot] 尾拍 %@ → rc=%d", fn, r);
+        });
+    } @catch (NSException *e) {
+        FLOGE(FC_UI, @"[autoshot] 尾拍异常: %@", e.reason);
+    }
+}
+
 void FDMUIAutoShotEnd(void) {
     @try {
         UINavigationController *nav = gFDMAutoShotNav;

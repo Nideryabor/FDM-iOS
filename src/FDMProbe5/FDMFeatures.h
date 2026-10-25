@@ -25,6 +25,7 @@ extern NSString *const P_BG;
 extern NSString *const P_ASSIST;    /* 助手图片 */
 extern NSString *const P_BUBBLE;    /* 对话气泡设置 */
 extern NSString *const P_FILECARD;  /* 文件快捷选项 */
+extern NSString *const P_MUSIC;     /* 音乐播放 */
 extern NSString *const P_MISC;      /* 杂项（iOS 独有项） */
 extern NSString *const P_NOTE;      /* 悬浮便签 */
 extern NSString *const P_GLASS;     /* 液态玻璃 */
@@ -51,6 +52,10 @@ BOOL FDMApplyModelConfig(NSData **out, NSArray **outItems);
 
 /* 提示词注入配置 */
 void FDMInjectConfig(NSString **mode, NSString **text, BOOL *enabled);
+
+/* ★ 点歌：要拼进系统提示词的那段话（开关关着 / 音乐没开 ⇒ nil）
+ *   为什么单独一个函数：它要能被「注入链路」和「设置页预览」两处调用。 */
+NSString *FDMDjPromptFragment(void);
 
 /* 对话增强 */
 BOOL FDMChatAppendEnabled(void);
