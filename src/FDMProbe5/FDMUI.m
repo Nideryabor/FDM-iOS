@@ -630,7 +630,7 @@ static NSDictionary *ReadHostSettings(void) {
 
 - (void)about {
     NSMutableString *m = [NSMutableString string];
-    [m appendFormat:@"FuckDSManger iOS %@\n\n", FDM_VERSION];
+    [m appendFormat:@"FDM iOS %@\n\n", FDM_VERSION];
     [m appendFormat:@"日志: %lu 条\n", (unsigned long)FLogTotal()];
     [m appendFormat:@"页面: %lu 个\n", (unsigned long)[[FDMConfig shared] allGroups].count];
     [m appendFormat:@"\nDocuments:\n%@", FDMDocs()];
@@ -703,7 +703,7 @@ static NSDictionary *ReadHostSettings(void) {
             c.detailTextLabel.text = [NSString stringWithFormat:@"%lu 条", (unsigned long)FLogTotal()];
         } else {
             c.textLabel.text = @"ℹ️  关于";
-            c.detailTextLabel.text = [NSString stringWithFormat:@"FuckDSManger iOS %@", FDM_VERSION];
+            c.detailTextLabel.text = [NSString stringWithFormat:@"FDM iOS %@", FDM_VERSION];
         }
     }
     return c;
