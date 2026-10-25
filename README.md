@@ -12,6 +12,30 @@
 
 ---
 
+## 📦 安装（TrollFools 注入）
+
+去 [Releases](https://github.com/Nideryabor/FDM-iOS/releases) 下最新版的
+`FDM.dylib`（或整个 `FDM-xxx-trollfools.tar.gz`，里面带注入说明）。
+
+1. 把 `FDM.dylib` 传到手机（Filza / 文件 App）
+2. 打开 **TrollFools** → 选 `DeepSeek Chat` → `+` → 选这个 dylib → 注入
+3. **完全退出** App（上滑杀掉）再打开
+4. 进「设置」页，列表底部应出现「FDM 模块设置」
+
+> ⚠️ **两条路线不要同时开**。本仓早期用的是 ElleKit 路线
+> （`/var/jb/usr/lib/TweakInject/FDM.dylib`）。
+> 现在统一走 TrollFools 直注 —— 那个旧文件要停用/删掉，
+> 否则两边抢着加载（虽然模块有单实例锁，但配置会被读两遍，行为很难懂）。
+
+**装好没怎么验**：`Documents/fdm.log` 里应该有
+
+```
+[sys] FDM v7.1 已加载  pid=xxxxx
+[cfg] 功能注册完成：26 页 / 266 项
+```
+
+---
+
 ## 🎯 现状（2026-10-24）
 
 | 环节 | 状态 |
