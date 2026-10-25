@@ -1,0 +1,665 @@
+v79 · 2026-10-25（设置树对齐安卓 · 杂项 · 隐私开关 · 口令不进 argv）
+产物: out/FDMProbe-v79-uitree-align.dylib (1,807,232 B)
+宿主: 2.7.1 · **真机验证通过（四张截图见 backups/v79-uitree-align-snapshot/shots/）**
+网络: 设备 IP 已改回 192.168.1.8（.env 同步；MCP 8090 仍全关，全程走 SSH）
+
+★★ 只改 UI 树的形状，不碰逻辑
+  基线 fdm-app/src/Tree.kt（= 原 smali GmHomeUi/GmMenuDialog 的照抄版）
+  安全前提：parent / order 只影响 childGroupsOf 的取数与排序，
+           enabledFor: 只看自己的 enabled、不走父链 ⇒ 挪页不改任何 JSON 键
+
+  首页： 灰度 / 聊天 / 美化 / 回复建议(提为顶级) / 环境伪装 / 调试 / 杂项(新)
+  聊天： 只留安卓也有的四项（本地数据库 / 回复建议 / 卡片提示词v2 / 富文本）
+  美化： 顺序照抄 GmBeautyDialog；音乐播放留原地（主人指定）
+  杂项： 系统提示词(旧) / 对话增强 / 模块发消息 / 快捷开关 —— iOS 多出来的全收这儿
+  图标： 去掉三处撞车（💬→💭 气泡、🎨→🌈 富文本、📝→🗒 便签）
+
+  安卓有而 iOS 没有的「换模型」开关：主人说不补（不做假开关）
+
+★★★ 安全修复：口令不进 argv（主人要求「先把这些改了」）
+  A. 远端泄漏（高危）：sshsu 里 "echo '$PW' | sudo -S ..." ⇒ 本地展开后拼进
+     发到设备的命令串，执行那一两秒设备上 `ps aux` 能看到明文（宿主 App 也能看）
+     修法：脚本内容走 stdin 落临时文件 → 口令单独走 stdin 喂 sudo -S
+  B. 本机泄漏：sshpass -p "$PW" ⇒ 本机 argv 可见
+     修法：_env.sh 里 export SSHPASS="$PW"，全部改 sshpass -e（8 个脚本已核对都 source 了）
+  C. 备份明文：backups/pre-env-fix/ 4 个文件硬编码口令 → 脱敏成 __已脱敏·见_env__
+  实测：设备上高频扫 ps 共 10047 行，口令 0 命中；抓到的命令行
+        `zsh -c sudo -S -p '' sh /tmp/_fdm_410.sh;`（只有路径）
+  新增护栏 tests/security/test_secrets.sh（已接进 run-all 的 6/6，共 10 项）
+        ① 无 echo $PW|sudo ② 无 sshpass -p ②b 用了 -e 必须 source
+        ③ 除 .env* 外 0 处明文 ④ .env 权限 600 + gitignore
+        ⑤ git 侧四条：已跟踪 / 暂存区 / 全历史 都不许有 .env 系；必须被 ignore 命中
+        自证：故意塞回 sshpass -p → 立刻报「有 1 项没过」，还原即恢复；
+              在 /tmp 假仓库 git add -f .env 后 ⑤ 立刻抓到 → 护栏不是摆设
+
+★ .env 不进库：双保险（主人要求「这个 .env 不要交上去」）
+  现状已经是干净的：git ls-files ios-port = 0；.env 被 /ios-port/ 挡住；
+                    暂存区/已跟踪/全历史/对象库 四查全空
+  加固：.gitignore 另加一组**不依赖目录**的规则（.env / .env.* / .env.bak* / !.env.example）
+        模拟去掉 /ios-port/ 后重查 → .env 与 .env.bak-* 仍被挡，模板恢复可入库
+
+※ 内网 IP（192.168.1.8:2222）按主人说的不再当风险提；
+  但「弱口令 + sudo 无限制」这个组合的建议保留 —— 换不换主人定。
+
+★ 口令来源追溯（主人问「哪来的」）
+  不是我推的/猜的：它从 iOS 端第一天（10-16）就硬编码在 4 个脚本里，
+  10-17「口令搬家」收进 .env，值与旧硬编码逐字节相同（已核对）。
+  进过 git 吗：0 次（git log --all -S 零命中）。.env 之外曾有 4 处明文，本轮已清。
+  建议（未动）：换强口令（现在是 名字缩写+生日 结构，字典一击即中）、
+                收敛 .env.bak-*、考虑 sudo 免密
+
+
+★★ 进库前敏感审计（主人：「看看 iOS 的文档有没有不可以进提交的」）
+  扫了 ios-port 全目录（55 篇 docs + README/VERSION/tools/src/analysis/iphone）
+  外加已入库的 专题/ 文档/ 巢穴/
+  · 文档里真 UUID 2 处（用户级 MMKV 实例名 / chat_session_id）→ 已脱敏
+  · 脚本里写死的容器 UUID 8 处 → 改成从 .env 的 APP_DOCS 推导；
+    _env.sh 的 APP_DOCS 兜底也去掉，缺了就报错退出（同「不悄悄用默认口令」原则）
+  · VERSION 里容器 UUID、docs/12 前缀、专题里一个 file- 服务端文件 ID → 已脱敏
+  · 没发现：口令明文 / JWT 全文 / Cookie 真值 / sk- / 真手机号邮箱 / 聊天正文
+  ★ 真危险其实不在文档，在这些目录（已按目录名再挡一遍）：
+      iphone/*.db        真聊天记录库（100 个会话）
+      iphone/*.ips       3 个崩溃日志
+      iphone/*-blob*.bin 7 个服务端下发 blob
+      analysis/mmkv-dump/ + raw-evidence/  MMKV 真身
+      uitree/ dist/ out/ backups/ app/
+    模拟「去掉 /ios-port/ 只提交源码」→ 上面 9 个目录全部仍被挡，docs/src 正常
+  护栏 upgrades：⑥ 真实容器/用户 UUID 不许出现在 docs/README/VERSION/tools/src
+                ⑦ data 类目录必须被 ignore
+                值都是运行时从 .env 和 iphone/*.db 现取（换设备自动跟着变）
+                自测：塞一行真 UUID 进 docs/00 → 立刻报红，还原即恢复
+  文档: docs/55
+
+测试: bash tests/run-all.sh → 10 套全过（含安全基线 21 项）
+文档: docs/53（UI 树）· docs/54（口令不进 argv）
+
+★ 顺手造了 `ui_auto_shot`（这一轮最大的意外收获）
+  MCP 死、没 frida、没有命令行截屏 ⇒ 模块自己弹设置页 + 自己 drawViewHierarchy
+  启动 18s 弹页拍照 → 每 3s 进一个子页拍一张 → 自己 dismiss
+  坑：第一版 static __weak nav ⇒ present 前就被 ARC 释放 ⇒「没有 nav，跳过 misc」
+      改强持有、End() 置 nil 才通
+
+★★ 隐私加固（主人：「做成开关，默认关，不然有隐私泄露嫌疑」）
+  ① 变成「调试 → 📸 自动截图」真开关，字段默认 NO（原来是读 JSON 的隐藏标志）
+  ② 拍完**先关再干活**：立刻 setValueQuietly:NO ⇒ 只跑一轮，崩了也不会下次再弹
+  ③ 每轮开跑前清掉上一轮 fdm-ui-*.png（不攒聊天截图）
+  ④ 新增「🗑 清空截图」按钮
+  ⑤ 新增 FDMConfig -setValueQuietly:for:key: —— 自动回写不算「用户改过」
+     （否则 UI 上会挂 ⭐、首页显示「已改 1 项」，用户其实啥都没改）
+  ⑥ 修 nav 时序：原来先赋值后判 presentedViewController ⇒ 有模态时 nav 存了却
+     永不 present，后续 Push 拍到的其实是宿主界面还日志显示成功
+  真机三轮：① 手写 json 能拍 ② 回写后 __mod 无 ui_auto_shot、⭐ 消失
+            ③ 再重启一条 autoshot 都不新增（45→45），开关停在 false
+  另加 [tree] 运行时树日志（注册完把 childGroupsOf 的真实顺序打出来）
+
+
+备份: backups/v79-uitree-align-snapshot/
+
+---
+v78 · 2026-10-25 凌晨（富文本终于修好 · 改用状态驱动巡检）
+产物: out/FDMProbe-v78-richensure.dylib (1,802,496 B)
+宿主: 2.7.1 · **真机验证通过（主人：修好了）**
+
+★★ 富文本「渲染一瞬又变裸」的最终解法
+  追了 4 个版本都在问「谁覆盖的」，全部失败：
+    v74 补 hook initWithString:      → 宿主不走
+    v75 补 hook setText:             → 宿主不走（setText-dbg 零命中）
+    v76 补 hook NSTextStorage 17 个类 → 零命中
+    v77 加 [REVERT] 抓内鬼            → 抓到栈但符号被剥离，且只命中思考块
+  诊断链证明：渲染对（属性 4→6）、数据活（survive 50ms 属性5项有颜色）、
+  思考块能保持彩色，**只有回复块完成瞬间变裸**，且之后不再走任何 setter。
+
+  ⇒ **换打法**：不问"谁改的"，只问"结果对不对"。
+     每 0.5 秒扫一遍可见视图树，发现 attributedText 里还带 < 标签 ⇒ 现场渲染重设。
+     （和玻璃 EnsureAttached / 气泡 BubbleEnsureAll 同一套方法论）
+
+  真机结果：
+    [ensure] ★ 巡检修正 ...ResponseMarkdownAdapter_ 74→55 字
+    [ensure] ★ 巡检修正 ...ResponseMarkdownAdapter_ 293→164 字
+    ⇒ 正是那个显示裸标签的回复块，被持续修正
+
+★ 顺带修的音乐 bug（主人报）
+  「播放条没内容但是提示词里面塞了红色高跟鞋」
+  病根：MusicUpdateSnapshot 只判 t != NULL，而队列是持久化的
+       ⇒ 上次听过的歌名一直留在快照里 ⇒ {music} 一直有值
+  修法：只有 PLAYING/LOADING 才给 song/artist/lyric，其余全空
+       FDMMusicNowPlayingLine / FDMMusicNowPlaying 同步修
+
+★ 诊断基建（以后还能用）
+  [survive]   50ms 后回看属性还在不在（判断"数据层 vs 绘制层"）
+  [REVERT]    发现"被改回原文"就打调用栈
+  [ensure]    巡检修正日志（含累计计数）
+  [render-out] 渲染结果首/尾属性项数 + 有无颜色
+
+测试: bash tests/run-all.sh → 9 套 276 条全过
+文档: docs/52（总结）
+备份: backups/v78-richensure-snapshot/
+
+---
+
+v77 · 2026-10-25（REVERT 返祖诊断 · 抓到的全是思考块）
+产物: out/FDMProbe-v75-richsetext.dylib (1,764,960 B)
+宿主: 2.7.1 · 已上机（进程稳定，无崩溃）
+
+★ 修「标签渲染了一瞬间又变回裸的」
+  主人这个观察极其关键 —— 直接把排查范围从「渲染逻辑」缩到「谁覆盖了它」。
+  真相：流式输出时
+    ① 宿主 setAttributedText: → 我们渲染 → **彩色（一瞬间）**
+    ② 宿主 setText: 原文（下一段流式数据）
+       ⇒ UILabel.text 和 .attributedText **互斥**，设 text 会清掉所有 attributes
+       ⇒ 变回裸标签
+  ⇒ 修法：st_setText 里也做渲染，如果有标签 + 像正文（>=12 字）+ 不是用户气泡，
+    就**改成设置 attributedText（渲染版）**，而不是调原 setText:
+  ⇒ 渲染用控件**当前字体/颜色**当底，结果才和宿主一致
+
+★★ 这一轮踩的坑：无限递归 → SIGSEGV
+  第一版把 gStReent=0 写在 setAttributedText 调用**之前**：
+    setText: → 渲染 → setAttributedText: → 内部回调 setText: → 重入 → …
+  ⇒ 栈溢出 ⇒ SIGSEGV ⇒ 整个 App 被杀，**日志一个字都没有**
+  ⇒ 修法：setAttributedText 必须锁在 gStReent=1 内调用
+
+★ 自动播放从"调试开关"升级成正式配置项
+  之前藏在 Documents/fdm-debug.json 的 music_autoplay 里（我调试时留下的），
+  主人找不到地方关，每次开 App 都被自动放歌。
+  现在：设置 → 美化 → 音乐播放 →「打开 App 自动播放」（默认**关**）
+  语义改进：开 ⇒ **接着上次那首放**（用存档 idx），不是从第 0 首
+
+真机验证:
+  23:48:10 [music] 自动播放关着（要自己点播放）
+  23:48:10 [music] ✓ 安装完成（20 首 / … / 自动播放 关）
+  进程 10018 活着，无 CRASH
+
+测试: bash tests/run-all.sh → 9 套 276 条全过
+文档: docs/51
+备份: backups/v75-richsetext-snapshot/
+
+---
+
+v74 · 2026-10-25（修 AI 回复里的 HTML 标签不渲染 + 关掉音乐自动播放）
+产物: out/FDMProbe-v74-richfix.dylib (1,747,824 B)
+宿主: 2.7.1 · 已上机
+
+★ 修「AI 写的 <c1> <br> <c2><b> 全当文字显示」
+  日志明明有「[rich] ★ 裸标签渲染 726 → 668 字」⇒ 渲染本身是成功的，
+  但界面没变 ⇒ **宿主走的是 `NSAttributedString initWithString:` 这条路**
+  （Swift 里 `NSAttributedString(string:)`），根本没调 `setAttributedText:`。
+  而原来 st_as_initWithString 这一支**只删 ⟦FDM⟧ 标记、不渲染富文本**
+  ⇒ 渲染结果被丢掉了。
+
+  ⇒ 修法：两条 initWith* 都补上渲染
+    · initWithString:        只能返回纯字符串 ⇒ 去掉标签（样式由调用方自己加）
+    · initWithString:attributes:  **能保留样式** ⇒ 渲染后把 rich 的颜色/bold
+                              并进宿主的 attr（字体只取宿主字号，保留 bold trait）
+  ⚠️ initWithString 是极高频方法，闸必须便宜：
+     防重入 + 长度<6 + **必须含 '<'** + 只有 >=12 字才尝试渲染
+
+★ 关掉音乐自动播放
+  病根：fdm-debug.json 里 `music_autoplay: true`（我之前调试时写进去的，一直没删）
+  ⇒ 改成 false。验证：23:42:51 安装后直到 23:43:17 无任何「切到第/▶」记录。
+
+测试: bash tests/run-all.sh → 9 套 276 条全过
+文档: docs/50
+备份: backups/v74-richfix-snapshot/
+
+---
+
+v73 · 2026-10-25（修「重进页面卡片重置」+ 顶栏调整）
+产物: out/FDMProbe-v73-spv2-norestore.dylib (1,746,176 B)
+宿主: 2.7.1 · 已上机验证
+
+★★ 重进页面 UI 重置的真凶：**我自己的"坏存档检测"**
+  v72 写的：
+    if ([js containsString:@"\"\""]) suspicious = YES;   // 想抓 v70 的 ""music
+  但正常存档里也有 `""` —— 内置三张卡的正文本来就是空的（"tx":""）
+  ⇒ 每次读到"有内置卡且正文空"的存档 ⇒ 判可疑 ⇒ 丢弃 ⇒ **UI 重置**
+  ⇒ 修复：不猜字符串，**直接看解析结果**
+     解析失败 / 归一化后还有非法 key / _st.count < 4 ⇒ 才算真坏
+     （fdmpc_from_json 内部已有归一化，孤儿 key 补卡、未知类型丢掉、
+       内置三张必须存在 ⇒ 不需要在外面再猜一遍）
+
+顶栏按主人要求调整:
+  左 = 返回（自己实现 —— 设了 leftBarButtonItem 系统返回键就被顶掉，
+             三层兜底：pop / dismiss nav / dismiss self）
+  右 = 重置（原位置是"新建"）
+  「＋ 新建」移到「容器」分组表头右侧（新建的卡直接进容器，放这儿语义也顺）
+
+真机验证:
+  修复前：23:11 / 23:24 / 23:32 / 23:33 连续 4 次「存档可疑 ⇒ 丢弃」
+  修复后：23:36:34 / 23:37:03 只有自检，**无任何"可疑"记录**
+         存档里「我的人设」那张卡还在，没被覆盖
+
+测试: bash tests/run-all.sh → 9 套 276 条全过
+文档: docs/49
+备份: backups/v73-spv2-norestore-snapshot/
+
+---
+
+v72 · 2026-10-25（卡片提示词 v2 逐条修 · 7 个问题）
+产物: out/FDMProbe-v72-spv2-fix2.dylib (1,745,344 B)
+宿主: 2.7.1 · 已上机，自检 47 条全过
+
+修主人报的 7 条（docs/48 逐条记了）:
+  ① UI 偏移（预览条压导航栏）→ edgesForExtendedLayout=UIRectEdgeNone
+                              + 预览改成 tableHeaderView
+  ② 展开内容错位盖到下一行   → heightForRow **别再问 cell**（会返回 nil），
+                              展开状态存 VC 的 _expandedKeys（按 key）
+  ③ 卡片点击三种情况混乱     → 中间=展开看内容（只读），右边=打开/移动（可写）
+  ④ 自定义卡展开看不到内容   → 展开显示「标题也进状态 + 字数 + 完整正文」
+  ⑤ ★★ 左边拖动条是坏的     → **allowableMovement = CGFLOAT_MAX**
+                              （v71 设 8.0，而这个值的意思是"移动超过 8pt 就取消手势"
+                                ⇒ 手指一动就 Cancelled ⇒ 永远拖不起来）
+                              + 加边缘自动滚
+  ⑥ 新建默认不进提示词       → 新建后**直接搬进容器** + 自动展开 + 滚到它
+  ⑦ 「标题也进」容易误触     → 不再"保存后重开弹窗"，按钮文案改明确
+
+★ 三条新教训:
+  · allowableMovement 是"超过就取消"，不是"容忍抖动"
+  · heightForRow 里调 cellForRowAtIndexPath 会拿到 nil ⇒ 高度和内容对不上
+  · 「看到」和「去改」要分给两个不同手势，混在一起会互相抢
+
+测试: bash tests/run-all.sh → 9 套 276 条全过
+文档: docs/48
+备份: backups/v72-spv2-fix2-snapshot/
+
+---
+
+v71 · 2026-10-25（卡片提示词 v2 重写 · 修 use-after-free）
+产物: out/FDMProbe-v71-spv2-fix.dylib (1,743,520 B)
+宿主: 2.7.1 · **已真机上机验证**
+
+★★ 本轮最贵的 bug：use-after-free
+  `fdmpc_move_in` 里先 `pc_list_remove`（内部 free 了 key），
+  再用**已释放的指针** `pc_box_push` 去 strdup。
+  · 小窝 gcc 不覆写刚 free 的内存 ⇒ 42 条断言全过（假安全感）
+  · 真机 clang + tcache 立刻覆写 ⇒ box[] 存垃圾 ⇒ **四个症状一起爆发**：
+      ① compose 0 字（找不到卡）
+      ② 标题全是 "?"（归一化补卡时 title 是垃圾）
+      ③ 拖不动（key 变 nil）
+      ④ 「拖回抽屉 (null) rc=0」
+  · 修法：move_in / move_out / delete_card **全部先 strdup 再动**
+  · 测试：新加断言 101~105 —— **主动灌 200 个同尺寸块**把 freed 内存覆盖掉再检查
+    （原来"move_in 后立刻 compose"永远通过，抓不到）
+
+界面重写（主人：参考 iOS 设置的原生拖拽）:
+  弃用 UICollectionView drag&drop（要长按 0.5s、易被抢）
+  ⇒ UITableView + 自写 pan：
+     左小横条 = 拖拽把手（长按 0.18s 激活，快照跟手，拖动时禁滚动）
+     中间点击 = 展开/收起（行高 62→132，显示约定原文）
+     右 ▸/＋  = 打开页面 / 移入容器
+     导航栏左「重置」（卡片乱了救命用）· 右「＋」
+
+"全换问号" 四重兜底:
+  ① 内置卡标题由**类型**决定，不读存档
+  ② PUSafe() 三级转换（stringWithUTF8String → initWithData → 逐字节+日志）
+  ③ 存档体检：含 `""` 或 key 长度<2 ⇒ 备份成 .bad + 回默认池
+  ④ 字体不用 systemFontOfSize:weight:（iOS 15 对中文 fallback 可能失败）
+
+顺手修: 副标题「自带约定 · N 字」的 N 原来是 strlen 字节数（中文 3 倍偏大），
+        改成 NSString.length —— suggestSpec 从 "503 字" 变 "210 字"
+
+真机验证（23:07~23:09）:
+  重算提示词：210 字（容器 1 张）    ← 不再是 0
+  重算提示词：268 字（容器 2 张）    ← 正确累加
+  内核自检 47 条全过（搬/复制/重排/归一化/坏存档）
+
+测试: bash tests/run-all.sh → 9 套 276 条全过（promptcard 47）
+文档: docs/47（UAF 血案 + 界面重写 + 四重兜底）
+备份: backups/v71-spv2-fix-snapshot/
+
+---
+
+v70 · 2026-10-25（卡片式系统提示词 v2）
+产物: out/FDMProbe-v70-spv2.dylib (1,742,864 B)
+宿主: 2.7.1 · **已真机上机，42 条自检全过**
+
+新增（对标安卓 SysPromptV2.kt 1,362 行）:
+  src/FDMProbe5/FDMPromptCard.h/.c  1,569 行  纯逻辑内核 + 42 条断言
+  src/FDMProbe5/FDMPromptUI.h/.m      679 行  UIKit 界面（UICollectionView 原生拖拽）
+  tests/promptcard/test_promptcard.c    45 行  离线测试入口
+
+改动:
+  FDMFeatures.m   聊天页加「🎴 卡片式提示词 v2」入口（chat 6→7 字段）
+  FDMUI.m         open_spv2 动作
+  FDMProbe.m      6s 块里跑 42 条自检
+  Makefile        FILES 加两个新文件
+  tests/run-all.sh  加入 promptcard（8→9 套）
+
+★ 核心模型（主人 2026-10-10 定的，一个字别改）:
+  系统提示词正文 = 容器里卡片们的内容按顺序拼起来（空行分隔）
+    回复建议卡 ⇒ 【追问建议】约定
+    音乐卡     ⇒ 【音乐变量】示例
+    富文本卡   ⇒ 【回答排版】约定
+    自定义文本 ⇒ 卡片里写的字
+  ⇒ 「提示词内容」文本框是**派生值**，不再手敲
+  ⇒ 容器空 ⇒ 提示词被清空
+
+三种卡片三套语义:
+  内置三张 = 搬（抽屉里那份没了，代表"要不要这段约定"）
+  文本源卡 = 复制（抽屉留一份，容器追加新副本，能无限拖）
+  自定义副本 = 搬 + 可编辑 + 抽屉里才有 🗑
+
+★★ 归一化（存档最后一道防线，安卓 3.62.2 修过"内置卡被当夜宵吃了"）:
+  ① 列表有/卡片表没有 → 补卡   ② 类型不认识 → 丢掉
+  ③ 内置三张+源卡必须存在，缺了补回抽屉   ④ 同 key 不许同时在两个列表
+  ⑤ 超上限截断  + 源卡不该出现在容器里
+
+真机验证（22:34）:
+  [spv2] 内核自检 42 条全过（搬/复制/重排/归一化/坏存档）
+  注册分组 chat（聊天，7 字段）  ← 之前 6
+
+★ 本轮抓到的 bug（全是自己写的）:
+  ① `sprintf("%s\"", "\"")` 输出两个引号 ⇒ JSON 变 `""music` ⇒ 存档全坏。
+     隐蔽点：归一化把坏数据救回来了，看着能用，但用户拖的卡片会静默消失
+  ② 测试断言自己写错两次（compose 会 trim / 用完整文案 strstr 找不到）
+  ③ `@(char*)` 不能包 NSString；`char* ?: @""` 类型不兼容
+  ④ 协议方法名是 itemsForBeginning**Drag**Session（少写 Drag 编译失败）
+  ⑤ 第一次把入口塞进了音乐页 ⇒ 已挪到「聊天」页
+
+测试: bash tests/run-all.sh → 9 套 271 条全过
+文档: docs/46（v2 全链 + 归一化五条 + 四个 bug）
+备份: backups/v70-spv2-snapshot/
+
+---
+
+v69 · 2026-10-25 凌晨（网易云登录 · 三条路全通）
+产物: out/FDMProbe-v69-login.dylib (1,643,648 B)
+宿主: 2.7.1 · **已真机上机（自检 12 条全过）**
+
+新增（对标安卓 GmMusicLogin 265 + MusicLogin.kt 417 + GmMusicApi 登录段 130）:
+  src/FDMProbe5/FDMMusicLogin.h/.m   520 行  凭证存取 + 流程编排 + 12 条启动自检
+  src/FDMProbe5/FDMMusicApi.m        +330 行 手动跟重定向 POST + 6 个登录接口 + md5Hex
+  src/FDMProbe5/FDMFeatures.m        +70 行  musiclogin 页（19 字段 / 9 个动作）
+  src/FDMProbe5/FDMUI.m              +130 行 动作处理 + 登录后清空敏感输入框
+  src/FDMProbe5/FDMProbe.m           +3 行   6s 块装 FDMMusicLoginInstall
+
+三条路:
+  ① 手机 + 短信验证码（/weapi/sms/captcha/sent + /weapi/w/login/cellphone）
+  ② 手机 / 邮箱 + 密码（md5 后发，明文不上传）
+  ③ 直接粘 cookie（三种形态：整条 Set-Cookie / 单对 k=v / 纯值）
+
+★★ 本轮核心技术坑（详见 docs/45）:
+  MUSIC_U 藏在 **302 那一跳**的 Set-Cookie 里。
+  NSURLSession 默认自动跟随重定向 ⇒ completionHandler 只拿到最终响应的头
+  ⇒ 凭证丢失。症状特别坑：界面提示"登录成功"，其实什么都没存上。
+  解法：HTTPShouldSetCookies=NO + HTTPCookieAcceptPolicyNever
+        + delegate 版 session + willPerformHTTPRedirection 里逐跳收 cookie
+        + 用 NSHTTPCookie 解析（allHeaderFields 会把多个 Set-Cookie 合并成一行）
+
+隐私（主人 2026-10-06 在安卓那边要求过）:
+  ⚠️ 凭证**明文**存 Documents/FDMmusic/login.json
+  · 界面 note 里写清楚了
+  · 登录成功后自动清空 密码/cookie/验证码 输入框
+  · iOS 额外把目录标记 NSURLIsExcludedFromBackupKey（不进 iCloud/iTunes 备份）
+  · 诊断串不打印凭证长度（长度也是指纹）
+
+真机验证（22:20）:
+  [cfg]   注册分组 musiclogin（网易云登录，19 字段）
+  [login] 自检 12 条全过（cookie 抠取三种形态）
+  [login] 没有 login.json（未登录）
+
+页面位置: 设置 → 美化 → 音乐播放 → 🔑 网易云登录
+
+仍缺:
+  ❌ token 刷新（凭证过期要重登）
+  ❌ 密码框密文显示（FDMUI 通用表格控件）
+  ⚠️ 登录自检只能在真机跑（依赖 ObjC 的 md5Hex），没做小窝可跑的纯 C 版
+  ⏳ 真实登录流程待主人提供凭证后验证
+
+测试: bash tests/run-all.sh → 8 套 229 条全过
+文档: docs/45（登录全链 + 重定向血泪）
+备份: backups/v69-login-snapshot/
+
+---
+
+v68 · 2026-10-25 凌晨（迷你卡定稿 · 拖不动修好 · 安卓移植处方）
+产物: out/FDMProbe-v68-minibar-final.dylib (1,552,016 B)
+宿主: 2.7.1 · **已真机上机，主人验收通过（"非常好!!!这是你这几天最聪明的一次"）**
+
+本轮修的致命 bug:
+  ① **整张卡拖不动** —— shouldReceiveTouch 里写 `v.tag >= 0 && v.tag <= 3`
+     但 UIView 默认 tag 就是 0，而 _playPage/毛玻璃 的 tag 全是 0
+     ⇒ 每一次触摸都被当成"摸到手柄"拒掉。手柄 tag 改 1000~1003
+  ② 常态下点歌词区也拖不动卡 ⇒ 改成 `return !_focusMode`（常态允许、聚焦拒绝）
+
+三态全部验通（真机日志）:
+  常态   封面小方块 + 歌词窄条 + 进度条吸附按钮上沿 + 按钮居中
+  聚焦   封面铺满整卡当背景 + 渐变暗膜 + 全歌词可滚 + 自动居中 + 长按跳转
+  纯图   双击隐藏歌词和蒙版只留封面，再双击恢复，单击回常态
+
+手势分工（互不打架）:
+  单击歌词      常态 ⇄ 聚焦
+  双击歌词      聚焦 → 纯图 ⇄ 恢复
+  双击卡片      纯图 → 恢复
+  长按 0.45s    聚焦态跳到那一句
+  划歌词        滚歌词（3 秒手动锁定后自动跟随）
+  拖四角        改大小（对角固定，240~560 × 150~560）
+  拖卡片        移动（常态任意处，聚焦态非歌词区）
+  双指捏        缩放（保留）
+
+★★ 安卓反向移植处方已写好（这是本轮重点产出）★★
+  docs/44-迷你卡安卓反向移植处方-2026-10-25.md
+  + 副本 mod-src/移植参考-迷你播放卡-来自iOS.md（安卓工程边上，找不到才怪）
+  + mod-src/README.md 里挂了指针
+
+  处方核心结论:
+    · 四角 Resize 安卓**已经是对的，别重写**
+    · 安卓 `body` 用 `weight=1` 就等价于 iOS 的"从下往上算"，**别抄手算代码**
+    · 歌词 → RecyclerView；手势 → GestureDetector + `onSingleTapConfirmed`
+    · 动画必须显式做（iOS 的 UIView 动画块是白送的）
+
+测试: bash tests/run-all.sh → 8 套 229 条全过
+铁律新增: 31（tag 别从 0 起）· 32（reloadRows 空数组会杀 App）· 33（缓存键要含源版本）
+备份: backups/v68-minibar-final-snapshot/
+
+---
+
+v67 · 2026-10-24 深夜（迷你卡 · 全歌词滚动 + 纯图模式 + 自适应布局）
+产物: out/FDMProbe-v67-lyricfull.dylib (1,552,016 B)
+宿主: 2.7.1 · **已真机上机并按真机日志验证**
+
+本轮（主人追加的第二批要求）:
+  ✅ 聚焦态显示**全部歌词**（UITableView，之前只有 3 行 label）
+  ✅ 歌词可滚动，滚动时**只滚歌词不拖卡**（3 秒手动锁定后自动恢复跟随）
+  ✅ 聚焦态**长按某句 → 跳到歌曲对应位置**
+  ✅ 聚焦态**双击 → 隐藏歌词+蒙版只留封面**，再双击恢复（单击仍回常态）
+  ✅ **进度条吸附在按钮行上方** ⇒ 卡片拉长时多出的高度全给歌词
+  ✅ 返回键被盖已修（_playPage 用 insertSubview:atIndex:1 压最底）
+
+真机日志证据（22:08~22:09）:
+  长按歌词第 6 行 → 跳到 35.9s（却又不太了解 只凭直觉）
+  歌词缓存重建：28 行 / 25 行
+  用户开始滑歌词 → 暂停跟随 3 秒
+  双击 → 纯图（隐藏歌词+蒙版） / 双击 → 恢复歌词
+
+★ 真机抓到的两个致命 bug（都已修）:
+  ① `reloadRowsAtIndexPaths` 收**空数组**会抛 NSInvalidArgumentException
+     前奏时 newRow = -1 ⇒ paths 为空 ⇒ 宿主 App 直接被杀
+  ② 歌词缓存只比 `songId` ⇒ 「歌词还在下载时先建了 0 行缓存」后再也不重建
+     ⇒ 聚焦态一片空白。改为同时比**源行数**
+
+新增/改动:
+  src/FDMProbe5/FDMMiniBar.m         1080 行  三态布局 + 全歌词表 + 四角缩放
+  src/FDMProbe5/FDMMusic.h/.m        +FDMMusicLyricCount/At/IndexAt（全歌词接口）
+  src/FDMProbe5/FDMLyric.c           +fdmlrc_line_ms（点/长按跳转）
+
+测试: bash tests/run-all.sh → 8 套 229 条全过
+文档: docs/43（排版 v3，含三态图 + 安卓移植坑）
+备份: backups/v67-lyricfull-snapshot/
+
+---
+
+v66 · 2026-10-24 深夜（迷你卡 · 封面当背景 + 四角拖拽）
+产物: out/FDMProbe-v66-minibar2.dylib (1,529,312 B)
+宿主: 2.7.1 · **已真机上机**
+
+本轮（主人追加要求）:
+  ✅ 聚焦态：封面铺满**整张卡**当背景，歌词叠在上面（不再是"铺满底部"）
+  ✅ 中间加 CAGradientLayer 渐变暗膜（0.62→0.28→0.72），白字才看得清
+  ✅ 聚焦态歌词纯白 + shadowRadius 3，上/下句 alpha 0.72
+  ✅ 改大小：**四角拖拽**（4 个 22pt 手柄，内侧 10pt 圆点，对角固定）
+  ✅ 双指捏合保留（单手方便）
+  ✅ 手柄避让整卡拖动（_pan.delegate 判 tag）
+
+★ 踩坑（写进 docs/43）:
+  · _cover 是 _playPage 的子视图 ⇒ 只改 cover 撑不到标题区，必须先把 _playPage 撑满
+  · CAGradientLayer 不跟 frame 自动变，layout 里要手动同步
+  · 四角缩放别用"累加增量"：夹到最小后往回拖有死区，手感怪 ⇒ 用"起点+总位移"
+  · 手柄贴内边 1pt，否则被 clipsToBounds 的圆角裁掉
+
+新增/改动:
+  src/FDMProbe5/FDMMiniBar.m         806 行  两态布局 + 四角缩放 + 歌词点击
+
+真机验证:
+  ✅ 存档已是新格式 {"w":329.24,"h":205.78,"sw":414,"sh":736}
+  ✅ 日志抓到「布局 → 聚焦（看歌词）」/「布局 → 常态」
+
+测试: bash tests/run-all.sh → 8 套 229 条全过
+文档: docs/43（排版 + 安卓反向移植评估，含四角缩放的安卓坑）
+备份: backups/v66-minibar2-snapshot/
+
+---
+
+v65 · 2026-10-24 深夜（迷你卡排版打磨 · 主人钦定样式）
+产物: out/FDMProbe-v65-minibar.dylib (1,526,016 B)
+宿主: 2.7.1 · **已真机上机**
+
+排版（主人原话见 docs/43）:
+  ✅ 点歌词区 → 隐藏播放条，封面平滑铺满底部，左上角单独 `‹` 返回键
+  ✅ 底部控件 右对齐 → **居中**
+  ✅ 进度圆点 28pt → **14pt**（自绘 UIImage）
+  ✅ 双击歌词 → 跳那一句（保留）
+  ✅ 双指捏合缩放卡片 240~560 × 150~560，松手即存
+
+★ 这一轮真机抓到的两个 bug（都已修）:
+  ① 进度冻住 —— 周期观察者只在「刚变 PLAYING」那一拍刷 UI，之后全不刷
+  ② 没有封面 —— state.json 故意不存 pic（版权），存档恢复后 pic 全空
+     ⇒ 播放时按 songId 查 songDetail 兜底补回（只内存）
+  ③ 中文日志乱码 —— `%s` 传 UTF-8 中文 ⇒ `Á∫¢Ëâ≤È´òË∑üÈûã`，改 `%@`
+  ④ 老存档语义变了 —— w/h 曾存屏幕尺寸，新代码当卡片尺寸读 ⇒ 卡片撑爆
+
+新增/改动:
+  src/FDMProbe5/FDMMusicModel.h/.c   900 行  纯 C 内核 + 47 条断言
+  src/FDMProbe5/FDMMusic.h/.m        780 行  AVPlayer + 存档 + 变量供数 + 封面兜底
+  src/FDMProbe5/FDMMiniBar.m         780 行  迷你卡（两态 + 缩放 + 歌词点击）
+  src/FDMProbe5/FDMLyric.c           +fdmlrc_line_ms（点歌词跳转）
+  src/FDMProbe5/FDMRichText.m        点歌 ⟦DJ:歌名-歌手⟧（三处）
+  src/FDMProbe5/FDMFeatures.m        新增 music 页
+  src/FDMProbe5/FDMProbe.m           6s 块装 FDMMusicInstall
+  src/FDMProbe5/Makefile             +AVFoundation
+
+真机验证结果（iPhone 7P · 192.168.1.7）:
+  ✅ 内核 47 条断言全过
+  ✅ 迷你卡挂载 UIWindow (414x736)
+  ✅ 搜索 code=200 / 封面补齐
+  ✅ 播放地址 http→https 绕 ATS
+  ✅ item ready，时长 235.1s（免费歌）/ 30.0s（VIP 试听）
+  ✅ 状态 → PLAYING，进度在走，播完自动接下一首
+  ✅ 歌词三行 + 点歌词 / 双击跳转
+
+仍缺:
+  ❌ 网易云登录（VIP 歌只能试听 30s）—— 只能 setMusicU 硬塞 cookie
+  ❌ 整页 HTML 渲染（下一批）
+  ❌ 卡片式系统提示词 v2
+
+环境变更:
+  iPhone IP   192.168.1.8 → **192.168.1.7**（.env 已改，旧备份 .env.bak-1024-ip）
+  ios-mcp     8090 仍 Connection refused ⇒ 全程 SSH
+
+测试: bash tests/run-all.sh → 8 套 229 条全过
+文档: docs/43（排版 + 安卓反向移植评估）· 42（音乐全链）· 41（差距对账）
+备份: backups/v64-music-snapshot/
+
+---
+
+v64 · 2026-10-24 下午（音乐全链）
+产物: out/FDMProbe-v64-music.dylib (1,500,464 B)
+sha256: 4f6ff177 1658ef9c c1947c53 80246253 daffa182 cb2779b2 1c2b15a8 a29ee33d
+宿主: 2.7.1
+设备: /var/jb/usr/lib/TweakInject/FDM.dylib  （ElleKit）
+⚠️ 本轮**未真机验证**（设备 No route to host）—— 全部离线自证
+
+新增（对标安卓 GmMusicPlayer 800 + GmMiniBarView 1051 + GmMiniBar 293 + GmMusicDj 352）:
+  src/FDMProbe5/FDMMusicModel.h/.c   900 行  纯 C 内核 + 47 条断言
+  src/FDMProbe5/FDMMusic.h/.m        741 行  AVPlayer 播放器 + 存档 + 变量供数
+  src/FDMProbe5/FDMMiniBar.m         656 行  悬浮迷你卡（播放页 + 搜索页）
+  tests/music/test_model.c                   离线自测入口
+
+改动:
+  FDMFeatures.m   新增 music 页（8 项）+ P_MUSIC 常量 + 美化页入口
+  FDMRichText.m   点歌 ⟦DJ:歌名-歌手⟧（★ 三处：定界符 / 快速闸 / 主循环）
+  FDMProbe.m      6s 块加 FDMMusicInstall()
+  Makefile        FILES 加三个新文件，FRAMEWORKS 加 AVFoundation
+
+能力:
+  ✅ 队列 / 三种循环 / 随机 / 切歌真值表（含单曲循环手动换歌）
+  ✅ 音质失败自动降级 lossless→exhigh→higher→standard
+  ✅ 播完自动接下一首
+  ✅ 迷你卡：封面/歌词/进度/拖动/位置记忆/搜索页
+  ✅ 点歌去重 15 秒窗
+  ✅ {music} {song} {artist} {lyric} 供数（v63 一直是空的）
+  ❌ 网易云登录页（短信/密码）  —— 只能 setMusicU 硬塞 cookie
+  ❌ 整页 HTML 渲染（下一批）
+  ❌ 卡片式系统提示词 v2
+
+测试: bash tests/run-all.sh  → 8 套全过（新增 model 47 条）
+文档: docs/41（安卓 3.71.19 差距对账）· docs/42（音乐全链实录）
+
+---
+
+v63 · 2026-10-24 深夜（宿主 2.7.1 兼容确认）
+产物: out/FDMProbe-v63-host271.dylib (1,364,688 B)
+设备: /var/jb/usr/lib/TweakInject/FDM.dylib  （★ 改走 ElleKit，不是 TrollFools 了）
+宿主: 2.7.1（版本号变了，但代码零适配）
+
+状态:
+  ✅ 液态玻璃             真机可用
+  ✅ 账号名               真机可用
+  ✅ 悬浮便签             可用（未验三 bug）
+  ✅ 回复建议胶囊         真机可用
+  ✅ 对话气泡设置         真机可用（2.7.1 上确认）
+  ✅ 修改助手图片         真机可用（2.7.1 上确认）
+
+★ 2.7.1 做了什么（docs/40）:
+  静态层做了 Swift metadata stripping —— 类名/源文件路径全抹掉
+     _TtC13DeepSeek_Chat   534 → 0
+     DeepSeek_Chat.        273 → 0
+     .swift                457 → 0
+  但 **运行时完全没变** ⇒ 所有功能零适配直接可用。
+  ⚠️ 静态分析要改：strings 搜类名会 0 命中 ≠ 类没了。
+
+★ iOS 助手头像真相（docs/40 · 三重证据）:
+  |          | 旧版1.2.6 | 2.6.2 | 2.7.1 |
+  | 类存在    |   ✅      |  ✅   |  ✅   |
+  | 被引用    |   0 处    | 0 处  | 0 处  |
+  | avatar 字段| ✅ 有    | ❌    | ❌    |
+  | 灰度键    |   无      |  无   |  无   |
+  ⇒ 1.x 有、2.x 删干净了。安卓那套「灰度置 false」在 iOS 完全用不了。
+  ⇒ 试过自己 alloc 宿主 AvatarView ⇒ SIGTRAP（Swift fatalError）。路封死。
+
+新增/改动:
+  src/FDMProbe5/FDMMap271.m     零类名依赖的锚点测绘器（纯 C，不会崩）
+  src/FDMProbe5/FDMAssistant.m  删除裸 alloc AvatarView 的探测（会崩）
+
+新增铁律:
+  23. 静态字符串搜不到 ≠ 运行时没有
+  24. 对 Swift 类发消息会 SIGTRAP —— 遍历类表用纯 C
+  25. 不要裸 alloc 宿主的 Swift 类
+  26. uiopen 'deepseek://' 会让 App SIGBUS 崩
+
+测试: bash tests/run-all.sh   # 7 套 149+ 断言全通过
+文档: docs/40（2.7.1 适配）· docs/39（助手图片）· docs/37（气泡）· docs/38（复盘）
+备份: backups/v63-host271/
+
+环境变更:
+  iPhone IP    192.168.1.7 → 192.168.1.8
+  部署方式     TrollFools → ElleKit (/var/jb/usr/lib/TweakInject/)
+  宿主         2.6.2 → 2.7.1
+  数据容器     5C6544F2-****-****-****-************（重装会变，看 .env）
+
+---
+
+v62 · 2026-10-24（气泡 + 助手图片都做成）
+产物: out/FDMProbe-v62-bubble-assistant.dylib (1,323,296 B)
+
+---
+

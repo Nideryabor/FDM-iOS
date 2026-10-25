@@ -1,0 +1,99 @@
+
+════════════════════════════════════════════════════════════
+[对方]  DeepSeek_Chat.AgentMessageCell    win=0x1202d7b30
+时间 2026-10-24 11:27:26.076
+vc=(无)
+════════════════════════════════════════════════════════════
+
+── 0. 容器自身 ──
+  frame  = 0.0,1827.0 414.0x303.0
+  bounds = 0.0,0.0 414.0x303.0
+  clipsToBounds=0  corner=0.0  bg=#0F0F0F/1.00
+
+── 1. 祖先链（往上 6 层）──
+  ↑1 DeepSeek_Chat.MessageListView frame=0.0,0.0 414.0x736.0 win=0.0,-484.0 414.0x736.0 clip=1 corner=0.0
+  ↑2 UIView frame=0.0,0.0 414.0x736.0 win=0.0,-484.0 414.0x736.0 clip=0 corner=0.0
+  ↑3 UIView frame=0.0,0.0 414.0x736.0 win=0.0,-484.0 414.0x736.0 clip=0 corner=0.0
+  ↑4 UIViewControllerWrapperView frame=0.0,0.0 414.0x736.0 win=0.0,-484.0 414.0x736.0 clip=0 corner=0.0
+  ↑5 UINavigationTransitionView frame=0.0,0.0 414.0x736.0 win=0.0,-484.0 414.0x736.0 clip=1 corner=0.0
+  ↑6 UILayoutContainerView frame=0.0,0.0 414.0x736.0 win=0.0,-484.0 414.0x736.0 clip=1 corner=0.0
+
+── 2. 视图树 ──
+DeepSeek_Chat.AgentMessageCell
+  frame=0.0,1827.0 414.0x303.0  bounds=0.0,0.0 414.0x303.0
+  win=0.0,0.0 414.0x303.0  vis=0.0,0.0 414.0x303.0
+  corner=0.0  clip=0 mask=0 bg=#0F0F0F/1.00 layBg=#0F0F0F/1.00
+· UIView
+·   frame=0.0,0.0 414.0x303.0  bounds=0.0,0.0 414.0x303.0
+·   win=0.0,0.0 414.0x303.0  vis=0.0,0.0 414.0x303.0
+·   corner=0.0  clip=0 mask=0 bg=nil layBg=nil
+· · DeepSeek_Chat.AgentMessageView
+· ·   frame=0.0,0.0 414.0x303.0  bounds=0.0,0.0 414.0x303.0
+· ·   win=0.0,0.0 414.0x303.0  vis=0.0,0.0 414.0x303.0
+· ·   corner=0.0  clip=0 mask=0 bg=nil layBg=nil
+· · · UIView
+· · ·   frame=16.0,12.0 374.0x279.0  bounds=0.0,0.0 374.0x279.0
+· · ·   win=16.0,12.0 374.0x279.0  vis=16.0,12.0 374.0x279.0
+· · ·   corner=0.0  clip=0 mask=0 bg=nil layBg=nil
+· · · · DeepSeek_Chat.MessageShareToggle
+· · · ·   frame=0.0,0.0 0.0x0.0  bounds=0.0,0.0 0.0x0.0
+· · · ·   win=16.0,12.0 0.0x0.0  vis=16.0,12.0 0.0x0.0
+· · · ·   corner=0.0  clip=0 mask=0 bg=nil layBg=nil
+· · · ·   hidden=1 alpha=1.00 z=0.00
+· · · · UIView
+· · · ·   frame=8.0,0.0 366.0x279.0  bounds=0.0,0.0 366.0x279.0
+· · · ·   win=24.0,12.0 366.0x279.0  vis=24.0,12.0 366.0x279.0
+· · · ·   corner=0.0  clip=0 mask=0 bg=nil layBg=nil
+· · · · · DeepSeek_Chat.AgentFragmentsView
+· · · · ·   frame=0.0,0.0 366.0x235.0  bounds=0.0,0.0 366.0x235.0
+· · · · ·   win=24.0,12.0 366.0x235.0  vis=24.0,12.0 366.0x235.0
+· · · · ·   corner=0.0  clip=0 mask=0 bg=nil layBg=nil
+· · · · · · DeepSeek_Chat.AgentGroupView
+· · · · · ·   frame=0.0,0.0 366.0x29.0  bounds=0.0,0.0 366.0x29.0
+· · · · · ·   win=24.0,12.0 366.0x29.0  vis=24.0,12.0 366.0x29.0
+· · · · · ·   corner=0.0  clip=0 mask=0 bg=nil layBg=nil
+· · · · · · DeepSeek_Chat.ResponseFragmentView
+· · · · · ·   frame=0.0,39.0 366.0x196.0  bounds=0.0,0.0 366.0x196.0
+· · · · · ·   win=24.0,51.0 366.0x196.0  vis=24.0,51.0 366.0x196.0
+· · · · · ·   corner=0.0  clip=0 mask=0 bg=nil layBg=nil
+· · · · · DeepSeek_Chat.MessageLoadingView
+· · · · ·   frame=0.0,0.0 0.0x0.0  bounds=0.0,0.0 0.0x0.0
+· · · · ·   win=24.0,12.0 0.0x0.0  vis=24.0,12.0 0.0x0.0
+· · · · ·   corner=0.0  clip=0 mask=0 bg=nil layBg=nil
+· · · · ·   hidden=1 alpha=1.00 z=0.00
+· · · · · · _TtC13DeepSeek_ChatP33_A72D3BB3B8D5150D21DB48FB5376CA2F22MessageDotsLoadingView
+· · · · · ·   frame=0.0,0.0 0.0x0.0  bounds=0.0,0.0 0.0x0.0
+· · · · · ·   win=24.0,12.0 0.0x0.0  vis=24.0,12.0 0.0x0.0
+· · · · · ·   corner=0.0  clip=0 mask=0 bg=nil layBg=nil
+· · · · · · _TtC13DeepSeek_ChatP33_A72D3BB3B8D5150D21DB48FB5376CA2F25MessageReadingLoadingView
+· · · · · ·   frame=0.0,0.0 0.0x0.0  bounds=0.0,0.0 0.0x0.0
+· · · · · ·   win=24.0,12.0 0.0x0.0  vis=24.0,12.0 0.0x0.0
+· · · · · ·   corner=0.0  clip=0 mask=0 bg=clear layBg=nil
+· · · · · ·   hidden=1 alpha=1.00 z=0.00
+· · · · · ·   [label] text=正在阅读 lines=1
+· · · · · DeepSeek_Chat.AgentMessageOperationBar
+· · · · ·   frame=0.0,243.0 366.0x36.0  bounds=0.0,0.0 366.0x36.0
+· · · · ·   win=24.0,255.0 366.0x36.0  vis=24.0,255.0 366.0x36.0
+· · · · ·   corner=0.0  clip=0 mask=0 bg=nil layBg=nil
+· · · · · · DeepSeek_Chat.AgentMessageInterruptedView
+· · · · · ·   frame=0.0,0.0 0.0x0.0  bounds=0.0,0.0 0.0x0.0
+· · · · · ·   win=24.0,255.0 0.0x0.0  vis=24.0,255.0 0.0x0.0
+· · · · · ·   corner=0.0  clip=0 mask=0 bg=nil layBg=nil
+· · · · · ·   hidden=1 alpha=1.00 z=0.00
+· · · · · · UIView
+· · · · · ·   frame=0.0,0.0 366.0x36.0  bounds=0.0,0.0 366.0x36.0
+· · · · · ·   win=24.0,255.0 366.0x36.0  vis=24.0,255.0 366.0x36.0
+· · · · · ·   corner=0.0  clip=0 mask=0 bg=nil layBg=nil
+
+  （共 15 个节点）
+
+── 3. ★推断：气泡底该画在哪（容器坐标系）──
+  文字真实包围盒 = 24.0,15.0 362.4x232.0
+  容器 bounds    = 0.0,0.0 414.0x303.0
+  ★建议气泡底 = 10.0,6.0 390.4x250.0（padding 14/9）
+  容器比它多出：上 6.0 下 47.0 左 10.0 右 13.6
+  建议高度 / 容器高度 = 0.83
+  ⚠ 容器比气泡高很多 ⇒ 直接铺满容器会「上宽下空」
+  （白名单：只读 bubble 专属 ivar）
+  （白名单里一个都没有）
+════════════════════════════════════════════════════════════

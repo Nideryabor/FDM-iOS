@@ -1,0 +1,85 @@
+# ============================================================
+# ios-port · 不入库清单
+#
+# 原则：凡是「本机特有」「私密」「可重建」的，都不进 git。
+# ============================================================
+
+# ---- ★ 私密配置（含 SSH 口令）----
+.env
+.env.local
+*.secret
+*.pem
+*.key
+
+# 但模板要入库（否则别人不知道怎么配）
+!.env.example
+
+# ---- 构建产物 ----
+src/*/.theos/
+packages/
+*.dylib
+*.deb
+*.tipa
+out/
+
+# ---- 运行时数据 / 大件 ----
+*.ipa
+*.apk
+app/
+analysis/raw-evidence/
+iphone/
+tmp/
+*.png
+*.jpg
+*.jpeg
+
+# ---- 备份（体积大，本地留着就行）----
+backups/
+
+# ---- 日志 ----
+*.log
+fdm.log*
+
+# 离线测试的编译中间物
+tests/music/.build/
+tmp/musictest/*.class
+
+# ============================================================
+#  2026-10-25 建独立仓库前的补齐（推 GitHub 用）
+# ============================================================
+
+# ---- ★ 口令快照（每个都含真口令）----
+.env.bak*
+.env.*.bak*
+
+# ---- ★ 真实设备/用户数据（绝不进库）----
+*.db
+*.db-shm
+*.db-wal
+*.ips
+*.mmkv
+*-blob*.bin
+analysis/mmkv-dump/
+analysis/raw-evidence/
+analysis/*-ipa/
+analysis/main.strings
+analysis/dotted-keys.txt
+uitree/
+dist/
+
+# ---- 体积大 / 可重建 ----
+*.ipa
+*.tar
+*.tar.gz
+*.zip
+
+# ---- Python / 编辑器 ----
+__pycache__/
+*.pyc
+.DS_Store
+
+# ---- Theos 构建产物（含 build-test）----
+.theos/
+**/.theos/
+*.o
+*.Td

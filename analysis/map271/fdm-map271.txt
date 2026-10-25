@@ -1,0 +1,164 @@
+
+════════════════════════════════════════════════════════════════
+[候选A（宽 >300）] _TtCC13DeepSeek_Chat13InputAreaView13TextInputView   bounds=370x46
+════════════════════════════════════════════════════════════════
+
+── ① 向下逐层（只走单子视图链，遇到分叉记录所有分支）──
+_TtCC13DeepSeek_Chat13InputAreaView13TextInputView 370x46 corner=0.0 bg=nil clip=0 subs=2
+  UILabel 354x26 corner=0.0 bg=#000000/0.00 clip=0 subs=0
+  _TtCCC13DeepSeek_Chat13InputAreaView13TextInputView8TextView 370x46 corner=0.0 bg=#000000/0.00 clip=1 subs=4   ★UITextView
+    _UIScrollViewScrollIndicator 3x40 corner=0.0 bg=nil clip=0 subs=1
+      UIView 3x40 corner=1.5 bg=#FFFFFF/0.50 clip=0 subs=0
+    _UIScrollViewScrollIndicator 364x3 corner=0.0 bg=nil clip=0 subs=1
+      UIView 364x3 corner=1.5 bg=#FFFFFF/0.50 clip=0 subs=0
+    _UITextContainerView 370x46 corner=0.0 bg=#000000/0.00 clip=0 subs=1
+      _UITextViewCanvasView 370x46 corner=0.0 bg=#000000/0.00 clip=0 subs=0
+    _UITextLayoutView 0x0 corner=0.0 bg=nil clip=0 subs=0
+
+── ② 文字容器链（从 cell 到 UITextView 的每一层）──
+最深 UITextView: _TtCCC13DeepSeek_Chat13InputAreaView13TextInputView8TextView  bounds=370x46
+  _TtCC13DeepSeek_Chat13InputAreaView13TextInputView  inCell=(0,0 370x46)
+  _TtCCC13DeepSeek_Chat13InputAreaView13TextInputView8TextView  inCell=(0,0 370x46)
+
+── ③ 疑似按钮条（h 28~44 且不含文字）──
+
+── ④ ivar 表（只列 UIView 类型且值非 nil 的）──
+  layout   type=
+  $__lazy_storage_$_editingMessageSource   type=
+  $__lazy_storage_$_textView   type=
+  placeholderLabel   type=
+  onAfterResize   type=
+  onTextChange   type=
+  onReturnTapped   type=
+  placeholderListeners   type=
+  _placeholderText   type=
+  shouldMessageListScrollToBottomIfItIsNearToBottom   type=
+  textHeight   type=
+  _canTextSend   type=
+
+── ⑤ 方法名（全量，便于找特征）──
+initWithCoder:  textViewDidChange:  textView:shouldChangeTextInRange:replacementText:  textView:editMenuForTextInRange:suggestedActions:  sizeThatFits:  initWithFrame:  .cxx_destruct  
+
+════════════════════════════════════════════════════════════════
+
+════════════════════════════════════════════════════════════════
+[候选B] _TtCC13DeepSeek_Chat13InputAreaView15PromptInputView   bounds=370x50
+════════════════════════════════════════════════════════════════
+
+── ① 向下逐层（只走单子视图链，遇到分叉记录所有分支）──
+_TtCC13DeepSeek_Chat13InputAreaView15PromptInputView 370x50 corner=0.0 bg=nil clip=0 subs=3
+  UIView 390x1 corner=0.0 bg=#3B3C3D/1.00 clip=0 subs=0
+  _TtCC13DeepSeek_Chat13InputAreaView16VoiceInputButton 370x46 corner=0.0 bg=nil clip=0 subs=1
+    UILabel 370x46 corner=0.0 bg=#000000/0.00 clip=0 subs=0
+  _TtCC13DeepSeek_Chat13InputAreaView13TextInputView 370x46 corner=0.0 bg=nil clip=0 subs=2
+    UILabel 354x26 corner=0.0 bg=#000000/0.00 clip=0 subs=0
+    _TtCCC13DeepSeek_Chat13InputAreaView13TextInputView8TextView 370x46 corner=0.0 bg=#000000/0.00 clip=1 subs=4   ★UITextView
+      _UIScrollViewScrollIndicator 3x40 corner=0.0 bg=nil clip=0 subs=1
+        UIView 3x40 corner=1.5 bg=#FFFFFF/0.50 clip=0 subs=0
+      _UIScrollViewScrollIndicator 364x3 corner=0.0 bg=nil clip=0 subs=1
+        UIView 364x3 corner=1.5 bg=#FFFFFF/0.50 clip=0 subs=0
+      _UITextContainerView 370x46 corner=0.0 bg=#000000/0.00 clip=0 subs=1
+        _UITextViewCanvasView 370x46 corner=0.0 bg=#000000/0.00 clip=0 subs=0
+      _UITextLayoutView 0x0 corner=0.0 bg=nil clip=0 subs=0
+
+── ② 文字容器链（从 cell 到 UITextView 的每一层）──
+最深 UITextView: _TtCCC13DeepSeek_Chat13InputAreaView13TextInputView8TextView  bounds=370x46
+  _TtCC13DeepSeek_Chat13InputAreaView15PromptInputView  inCell=(0,0 370x50)
+  _TtCC13DeepSeek_Chat13InputAreaView13TextInputView  inCell=(0,0 370x46)
+  _TtCCC13DeepSeek_Chat13InputAreaView13TextInputView8TextView  inCell=(0,0 370x46)
+
+── ③ 疑似按钮条（h 28~44 且不含文字）──
+
+── ④ ivar 表（只列 UIView 类型且值非 nil 的）──
+  textInputView   type=
+  voiceInput   type=
+  separaterView   type=
+  textInputConstraint   type=
+  voiceInputConstraint   type=
+
+── ⑤ 方法名（全量，便于找特征）──
+initWithCoder:  initWithFrame:  .cxx_destruct  
+
+════════════════════════════════════════════════════════════════
+
+════════════════════════════════════════════════════════════════
+[候选A（宽 >300）] _TtCC13DeepSeek_Chat13InputAreaView13TextInputView   bounds=370x46
+════════════════════════════════════════════════════════════════
+
+── ① 向下逐层（只走单子视图链，遇到分叉记录所有分支）──
+_TtCC13DeepSeek_Chat13InputAreaView13TextInputView 370x46 corner=0.0 bg=nil clip=0 subs=2
+  UILabel 354x26 corner=0.0 bg=#000000/0.00 clip=0 subs=0
+  _TtCCC13DeepSeek_Chat13InputAreaView13TextInputView8TextView 370x46 corner=0.0 bg=#000000/0.00 clip=1 subs=4   ★UITextView
+    _UIScrollViewScrollIndicator 3x40 corner=0.0 bg=nil clip=0 subs=1
+      UIView 3x40 corner=1.5 bg=#FFFFFF/0.50 clip=0 subs=0
+    _UIScrollViewScrollIndicator 364x3 corner=0.0 bg=nil clip=0 subs=1
+      UIView 364x3 corner=1.5 bg=#FFFFFF/0.50 clip=0 subs=0
+    _UITextContainerView 370x46 corner=0.0 bg=#000000/0.00 clip=0 subs=1
+      _UITextViewCanvasView 370x46 corner=0.0 bg=#000000/0.00 clip=0 subs=0
+    _UITextLayoutView 0x0 corner=0.0 bg=nil clip=0 subs=0
+
+── ② 文字容器链（从 cell 到 UITextView 的每一层）──
+最深 UITextView: _TtCCC13DeepSeek_Chat13InputAreaView13TextInputView8TextView  bounds=370x46
+  _TtCC13DeepSeek_Chat13InputAreaView13TextInputView  inCell=(0,0 370x46)
+  _TtCCC13DeepSeek_Chat13InputAreaView13TextInputView8TextView  inCell=(0,0 370x46)
+
+── ③ 疑似按钮条（h 28~44 且不含文字）──
+
+── ④ ivar 表（只列 UIView 类型且值非 nil 的）──
+  layout   type=
+  $__lazy_storage_$_editingMessageSource   type=
+  $__lazy_storage_$_textView   type=
+  placeholderLabel   type=
+  onAfterResize   type=
+  onTextChange   type=
+  onReturnTapped   type=
+  placeholderListeners   type=
+  _placeholderText   type=
+  shouldMessageListScrollToBottomIfItIsNearToBottom   type=
+  textHeight   type=
+  _canTextSend   type=
+
+── ⑤ 方法名（全量，便于找特征）──
+initWithCoder:  textViewDidChange:  textView:shouldChangeTextInRange:replacementText:  textView:editMenuForTextInRange:suggestedActions:  sizeThatFits:  initWithFrame:  .cxx_destruct  
+
+════════════════════════════════════════════════════════════════
+
+════════════════════════════════════════════════════════════════
+[候选B] _TtCC13DeepSeek_Chat13InputAreaView15PromptInputView   bounds=370x50
+════════════════════════════════════════════════════════════════
+
+── ① 向下逐层（只走单子视图链，遇到分叉记录所有分支）──
+_TtCC13DeepSeek_Chat13InputAreaView15PromptInputView 370x50 corner=0.0 bg=nil clip=0 subs=3
+  UIView 390x1 corner=0.0 bg=#3B3C3D/1.00 clip=0 subs=0
+  _TtCC13DeepSeek_Chat13InputAreaView16VoiceInputButton 370x46 corner=0.0 bg=nil clip=0 subs=1
+    UILabel 370x46 corner=0.0 bg=#000000/0.00 clip=0 subs=0
+  _TtCC13DeepSeek_Chat13InputAreaView13TextInputView 370x46 corner=0.0 bg=nil clip=0 subs=2
+    UILabel 354x26 corner=0.0 bg=#000000/0.00 clip=0 subs=0
+    _TtCCC13DeepSeek_Chat13InputAreaView13TextInputView8TextView 370x46 corner=0.0 bg=#000000/0.00 clip=1 subs=4   ★UITextView
+      _UIScrollViewScrollIndicator 3x40 corner=0.0 bg=nil clip=0 subs=1
+        UIView 3x40 corner=1.5 bg=#FFFFFF/0.50 clip=0 subs=0
+      _UIScrollViewScrollIndicator 364x3 corner=0.0 bg=nil clip=0 subs=1
+        UIView 364x3 corner=1.5 bg=#FFFFFF/0.50 clip=0 subs=0
+      _UITextContainerView 370x46 corner=0.0 bg=#000000/0.00 clip=0 subs=1
+        _UITextViewCanvasView 370x46 corner=0.0 bg=#000000/0.00 clip=0 subs=0
+      _UITextLayoutView 0x0 corner=0.0 bg=nil clip=0 subs=0
+
+── ② 文字容器链（从 cell 到 UITextView 的每一层）──
+最深 UITextView: _TtCCC13DeepSeek_Chat13InputAreaView13TextInputView8TextView  bounds=370x46
+  _TtCC13DeepSeek_Chat13InputAreaView15PromptInputView  inCell=(0,0 370x50)
+  _TtCC13DeepSeek_Chat13InputAreaView13TextInputView  inCell=(0,0 370x46)
+  _TtCCC13DeepSeek_Chat13InputAreaView13TextInputView8TextView  inCell=(0,0 370x46)
+
+── ③ 疑似按钮条（h 28~44 且不含文字）──
+
+── ④ ivar 表（只列 UIView 类型且值非 nil 的）──
+  textInputView   type=
+  voiceInput   type=
+  separaterView   type=
+  textInputConstraint   type=
+  voiceInputConstraint   type=
+
+── ⑤ 方法名（全量，便于找特征）──
+initWithCoder:  initWithFrame:  .cxx_destruct  
+
+════════════════════════════════════════════════════════════════
