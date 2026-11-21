@@ -1,5 +1,57 @@
 # FDM · iOS 运行时模块
 
+> ## 📦 已归档（ARCHIVED）· 2026-11-21
+>
+> **项目自本日起停止维护，仓库转为只读存档。源码 / 文档 / 历史 / Releases 全部原样保留，
+> 取消归档即可复活（Settings → Unarchive repository）。**
+>
+> ### 为什么停
+>
+> 与安卓版同一原因：宿主 App 从 2026-09 起把「快速 / 专家 / 识图」合并成统一**「智能模式」**，
+> 2026-11 中旬起免费端开始**限额**（长对话 7 天未活跃回收、单次输入上限约 4 万字、触发「算力不足」提示），
+> 业内普遍解读为 **C 端付费前奏**（钛媒体 / 21世纪经济报道）。
+>
+> 本项目的命脉是**在无符号表的闭源 App 里测绘锚点**——宿主每升级一次就要重测一遍
+> （2.7.1 那轮 Swift metadata stripping 就已经把静态路封死，全靠运行时测绘）。
+> 宿主侧能玩的量在缩，维护成本却随版本线性上涨 ⇒ **停在这里。**
+>
+> ### 最后的可用版本
+>
+> | 项 | 值 |
+> |---|---|
+> | 版本 | **v80 · 2026-10-25**（富文本根治 · AI 点歌） |
+> | 产物 | `FDMProbe-v80-dj.dylib`（1,825,664 B）· `dist/FDM-v80-trollfools/` |
+> | 实测宿主 | `com.deepseek.chat` **2.7.1**（iPhone 7P · ElleKit / TrollFools 两种注入方式都验过） |
+> | 发行 | [Releases · v80](../../releases/tag/v80) |
+>
+> ⚠️ **只对宿主 2.7.x 有效**，且 iOS 15 以下、越狱 / TrollStore 环境。宿主再升级不再跟进。
+>
+> ### 这份仓库里**仍然有价值**的东西（跟宿主死活无关）
+>
+> | 内容 | 说明 |
+> |---|---|
+> | `analysis/map271` | **无符号表下的运行时锚点测绘器**（纯 C，不发 ObjC 消息所以不会 SIGTRAP）—— 通用手法 |
+> | `docs/` 58 篇 | 全部踩坑与血案复盘：UAF、重定向丢 cookie、`allowableMovement`、Swift 泛型特化… |
+> | **铁律 1~42** | 从「tag 别从 0 起」到「指纹记目标状态，不是『我干过没』」 |
+> | `tests/` | 10 套离线测试 + 安全基线（含「口令不进 argv」护栏） |
+>
+> ### 怎么复活
+>
+> ```bash
+> git clone https://github.com/Nideryabor/FDM-iOS.git
+> cd FDM-iOS && git checkout -b revive
+> cp .env.example .env && chmod 600 .env      # 口令从 .env 读，脚本里没有任何默认值
+> ./tools/env.py                              # 先自检配置
+> ```
+> 换宿主版本后跑 `analysis/map271` 重新测绘，再按 `docs/` 里最新的勘察记录核对锚点。
+>
+> ### 致谢
+>
+> 从 10-16 的第一行 hook，到 v80 的「提示词注入 → 模型写标记 → 渲染层解析 → 搜索播放」全链跑通。
+> 顺带留下了 `ui_auto_shot` 这种「没 MCP、没 frida 也能自己截图」的野路子。
+>
+> ---
+
 一个在 iOS 上做**运行时方法替换（method swizzling）+ 视图层改造**的实验项目。
 纯 Objective-C + 少量 C，Theos 交叉编译，产物是单个 `dylib`。
 
